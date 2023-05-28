@@ -3,27 +3,15 @@ import { uniq } from 'lodash';
 import { PlacedTiles, Tile } from '../game/types';
 import { sowpods } from '../game/sowpods';
 import { invalidSequences } from '../game/invalidSequences';
-import { board } from '../game/board';
 import { keyBy } from 'lodash';
+import { generateMovesScore } from './generateWordScore';
 
-const generateMoveScore = (words:Tile[][]) => {
-  let totalScore = 0;
+const directionMatrix = [[0, 1], [0, -1], [1, 0], [-1, 0]];
 
-  words.forEach(word => {
-    const wordScoreMultipliers:number[] = [];
-    let baseWordScore = 0;
-    word.forEach(letter => {
-      const { x, y, points } = letter;
-      baseWordScore += points * board[y][x].letterScoreModifier;
-      wordScoreMultipliers.push(board[y][x].wordScoreModifier);
-    });
-    wordScoreMultipliers.forEach(multiplier => {
-      baseWordScore *= multiplier;
-    });
-    totalScore += baseWordScore;
-  });
-
-  return totalScore;
+const generatePlacementCacheId = (placements:Tile[]) => {
+  const placementCacheIdArr:string[] = placements.map(i => `${i.x},${i.y},${i.letter}`);
+  placementCacheIdArr.sort();
+  return placementCacheIdArr.join('_');
 };
 
 type moves = Array<{
@@ -39,15 +27,19 @@ const generateAIMoves = (
   horizontalSequences:Tile[][], // all horizontal sequences generated so far
   verticalSequences:Tile[][], // all vertical sequences generated so far
   moves:moves, // array of all possible moves. populated by this function.
-  depth:number // recursion depth, aka how many letters can the AI play at once.
+  depth:number, // recursion depth, aka how many letters can the AI play at once.
+  perfMetrics:{[key:string]:any} // performance metrics for development purposes only
 ) => {
+  perfMetrics.depthsIterated[depth]++;
+  perfMetrics.timesGenerateAIMovesCalled++;
+
   // create an array of all possible ways to place one letter
   const tilesDeduped:string[] = uniq(tiles);
-  const placements:PlacedTiles = {};
+  const placements:Tile[] = [];
   if (depth === 0) {
     // the first letter can be placed anywhere adjacent to a pre-existing placed letter.
     Object.values(placedTiles).forEach(placedTile => {
-      [[0, 1], [0, -1], [1, 0], [-1, 0]].forEach(i => {
+      directionMatrix.forEach(i => {
         const coordinateString = `${placedTile.x + i[0]},${placedTile.y + i[1]}`;
         if (
           placedTile.x + i[0] >= 0 && placedTile.x + i[0] <= 14
@@ -56,11 +48,11 @@ const generateAIMoves = (
           && !tempPlacedTiles.hasOwnProperty(coordinateString)
         ) {
           tilesDeduped.forEach(tile => {
-            placements[`${coordinateString},${tile}`] = {
+            placements.push({
               ...tileMap[tile],
               x: placedTile.x + i[0],
               y: placedTile.y + i[1]
-            };
+            });
           });
         }
       })
@@ -68,22 +60,23 @@ const generateAIMoves = (
   } else if (depth >= 1) {
     const possibleDirections = depth === 1
       // the second letter must only be placed on the same row or column as the first letter.
-      ? [[0, 1], [0, -1], [1, 0], [-1, 0]]
+      ? directionMatrix
       // the third and onwards letters must only be placed on the same row or column as the first two letters were on.
       : (
         Object.values(tempPlacedTiles)[0].x === Object.values(tempPlacedTiles)[1].x
-          ? [[0, 1], [0, -1]]
-          : [[1, 0], [-1, 0]]
-    );
+          ? directionMatrix.slice(0, 2)
+          : directionMatrix.slice(2)
+      )
+    ;
     possibleDirections.forEach(i => {
       // from first letter, travel in all directions until either an empty square or the edge of the board is found.
       let counter = 1;
-      const firstTile:Tile = Object.values(tempPlacedTiles)[0];
+      const startTile:Tile = Object.values(tempPlacedTiles)[0];
       while (true) {
-        const coordinateString = `${firstTile.x + i[0] * counter},${firstTile.y + i[1] * counter}`;
+        const coordinateString = `${startTile.x + i[0] * counter},${startTile.y + i[1] * counter}`;
         if (
-          firstTile.x + i[0] * counter < 0 || firstTile.x + i[0] * counter > 14
-          || firstTile.y + i[1] * counter < 0 || firstTile.y + i[1] * counter > 14
+          startTile.x + i[0] * counter < 0 || startTile.x + i[0] * counter > 14
+          || startTile.y + i[1] * counter < 0 || startTile.y + i[1] * counter > 14
         ) {
         // if out of bounds, stop searching in that direction.
           return;
@@ -91,15 +84,15 @@ const generateAIMoves = (
           // if empty square is found, add placements, then proceed to the next direction.
           // eslint-disable-next-line no-loop-func
           tilesDeduped.forEach(tile => {
-            placements[`${coordinateString},${tile}`] = {
+            placements.push({
               ...tileMap[tile],
-              x: firstTile.x + i[0] * counter,
-              y: firstTile.y + i[1] * counter
-            };
+              x: startTile.x + i[0] * counter,
+              y: startTile.y + i[1] * counter
+            });
           });
           return;
         } else {
-          // if non-empty square is found, keep searching in that direction.
+          // if non-empty, in-bounds square is found, keep searching in that direction.
           counter++;
         }
       }
@@ -107,26 +100,23 @@ const generateAIMoves = (
   }
 
   // iterate through all placements, and process horizontal and vertical sequence created by that placement
-  Object.values(placements).forEach(placement => {
+  placements.forEach(placement => {
+    perfMetrics.placementsTotalAttempted++;
+
     const newTempPlacedTiles = { ...tempPlacedTiles };
     newTempPlacedTiles[`${placement.x},${placement.y}`] = placement;
     // cache a unique id based on placement coordinates and letter to prevent duplicate iterations
     // such as iterating on 5,5 -> 5,6, and also 5,6 -> 5,5.
-    const placementCacheIdArr:string[] = [
-      ...Object.values(newTempPlacedTiles).map(
-        prevPlacement => `${prevPlacement.x},${prevPlacement.y},${prevPlacement.letter}`
-      )
-    ];
-    placementCacheIdArr.sort();
-    const placementCacheId = placementCacheIdArr.join('_');
+    const placementCacheId = generatePlacementCacheId(Object.values(newTempPlacedTiles));
     if (placementCache.hasOwnProperty(placementCacheId)) {
+      perfMetrics.placementsSkippedDueToCaching++;
       return;
     }
     placementCache[placementCacheId] = true;
 
     const horizontalSequence = [placement];
     const verticalSequence = [placement];
-    [[0, 1], [0, -1], [1, 0], [-1, 0]].forEach(i => {
+    directionMatrix.forEach(i => {
       // find the horizontal and vertical sequence containing target square.
       let counter = 1;
       while (true) {
@@ -156,19 +146,19 @@ const generateAIMoves = (
       invalidSequences.hasOwnProperty(horizontalSequence.map(i => i.letter).join(''))
       || invalidSequences.hasOwnProperty(verticalSequence.map(i => i.letter).join(''))
     ) {
+      perfMetrics.placementsTerminatedDueToInvalidSequence++;
       return; // proceed to next placement
     } else {
       // if all sequences are valid (but not necessarily actual words), record them.
       // placing a letter after the first will change a sequence that was previously formed.
       // so, depending on if the placement was horizontal or vertical, respective previous sequences need to be overwritten.
-      let placementDirection:string = '';
       if (depth > 0) {
-        const respectiveTile = Object.values(tempPlacedTiles)[0];
-        placementDirection = respectiveTile.x === placement.x ? 'vertical' : 'horizontal';
-        if (placementDirection === 'horizontal') {
-          newHorizontalSequences = [];
-        } else if (placementDirection === 'vertical') {
+        if (Object.values(tempPlacedTiles)[0].x === placement.x) {
+          // placement is vertical
           newVerticalSequences = [];
+        } else {
+          // placement is horizontal
+          newHorizontalSequences = [];
         }
       }
       if (horizontalSequence.length > 1) {
@@ -185,13 +175,14 @@ const generateAIMoves = (
       moves.push({
         placedTiles: newTempPlacedTiles,
         words: combinedNewSequences,
-        score: generateMoveScore(combinedNewSequences)
+        score: generateMovesScore(combinedNewSequences)
       });
     }
 
     // add the next letter.
     const newTiles = [...tiles];
     newTiles.splice(newTiles.indexOf(placement.letter), 1);
+    perfMetrics.placementsFullyProcessed++;
     if (newTiles.length) {
       generateAIMoves(
         placedTiles,
@@ -201,7 +192,8 @@ const generateAIMoves = (
         newHorizontalSequences,
         newVerticalSequences,
         moves,
-        depth + 1
+        depth + 1,
+        perfMetrics
       );
     }
   });
@@ -214,8 +206,16 @@ export const generateAIMove = (
   const timeStart = Date.now();
 
   const moves:moves = [];
+  const perfMetrics:{[key:string]:any} = {
+    placementsTotalAttempted: 0,
+    placementsSkippedDueToCaching: 0,
+    placementsTerminatedDueToInvalidSequence: 0,
+    placementsFullyProcessed: 0,
+    timesGenerateAIMovesCalled: 0,
+    depthsIterated: [0, 0, 0, 0, 0, 0, 0]
+  };
 
-  generateAIMoves(placedTiles, tiles, {}, {}, [], [], moves, 0);
+  generateAIMoves(placedTiles, tiles, {}, {}, [], [], moves, 0, perfMetrics);
 
   moves.sort((a, b) => b.score - a.score);
 
@@ -229,6 +229,7 @@ export const generateAIMove = (
   );
   console.log(`found ${moves.length} possible moves in ${timeTaken}ms`);
   console.log(`the best move is "${fancyDisplayResult[0].stringifiedWords}", scoring ${fancyDisplayResult[0].score}`);
+  console.log(`perfMetrics: `, perfMetrics)
   console.log(`all possible moves here:`, keyBy(fancyDisplayResult, 'stringifiedWords'));
 
   // return the top scoring move. this is not optimal from a competitive scrabble play point of view,
