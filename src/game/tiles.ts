@@ -1,34 +1,37 @@
-import { Tiles } from './types';
+import { Tile } from './types';
 
-export const tiles:Tiles = [
-  { letter: 'A', points: 1, count: 9 },
-  { letter: 'B', points: 3, count: 2 },
-  { letter: 'C', points: 3, count: 2 },
-  { letter: 'D', points: 2, count: 3 },
-  { letter: 'E', points: 1, count: 12 },
-  { letter: 'F', points: 4, count: 2 },
-  { letter: 'G', points: 2, count: 3 },
-  { letter: 'H', points: 4, count: 2 },
-  { letter: 'I', points: 1, count: 1 },
-  { letter: 'J', points: 8, count: 1 },
-  { letter: 'K', points: 5, count: 1 },
-  { letter: 'L', points: 1, count: 4 },
-  { letter: 'M', points: 3, count: 2 },
-  { letter: 'N', points: 1, count: 6 },
-  { letter: 'O', points: 1, count: 8 },
-  { letter: 'P', points: 3, count: 2 },
-  { letter: 'Q', points: 10, count: 1 },
-  { letter: 'R', points: 1, count: 6 },
-  { letter: 'S', points: 1, count: 4 },
-  { letter: 'T', points: 1, count: 6 },
-  { letter: 'U', points: 1, count: 4 },
-  { letter: 'V', points: 4, count: 2 },
-  { letter: 'W', points: 4, count: 2 },
-  { letter: 'X', points: 8, count: 1 },
-  { letter: 'Y', points: 4, count: 2 },
-  { letter: 'Z', points: 10, count: 1 },
-  { letter: 'BLANK', points: 0, count: 2 }
-];
+interface TileMap {
+  [key:string]:Tile
+};
+export const tileMap:TileMap = {
+  A: { letter: 'A', points: 1, count: 9, x: -1, y: -1 },
+  B: { letter: 'B', points: 3, count: 2, x: -1, y: -1 },
+  C: { letter: 'C', points: 3, count: 2, x: -1, y: -1 },
+  D: { letter: 'D', points: 2, count: 3, x: -1, y: -1 },
+  E: { letter: 'E', points: 1, count: 12, x: -1, y: -1 },
+  F: { letter: 'F', points: 4, count: 2, x: -1, y: -1 },
+  G: { letter: 'G', points: 2, count: 3, x: -1, y: -1 },
+  H: { letter: 'H', points: 4, count: 2, x: -1, y: -1 },
+  I: { letter: 'I', points: 1, count: 1, x: -1, y: -1 },
+  J: { letter: 'J', points: 8, count: 1, x: -1, y: -1 },
+  K: { letter: 'K', points: 5, count: 1, x: -1, y: -1 },
+  L: { letter: 'L', points: 1, count: 4, x: -1, y: -1 },
+  M: { letter: 'M', points: 3, count: 2, x: -1, y: -1 },
+  N: { letter: 'N', points: 1, count: 6, x: -1, y: -1 },
+  O: { letter: 'O', points: 1, count: 8, x: -1, y: -1 },
+  P: { letter: 'P', points: 3, count: 2, x: -1, y: -1 },
+  Q: { letter: 'Q', points: 10, count: 1, x: -1, y: -1 },
+  R: { letter: 'R', points: 1, count: 6, x: -1, y: -1 },
+  S: { letter: 'S', points: 1, count: 4, x: -1, y: -1 },
+  T: { letter: 'T', points: 1, count: 6, x: -1, y: -1 },
+  U: { letter: 'U', points: 1, count: 4, x: -1, y: -1 },
+  V: { letter: 'V', points: 4, count: 2, x: -1, y: -1 },
+  W: { letter: 'W', points: 4, count: 2, x: -1, y: -1 },
+  X: { letter: 'X', points: 8, count: 1, x: -1, y: -1 },
+  Y: { letter: 'Y', points: 4, count: 2, x: -1, y: -1 },
+  Z: { letter: 'Z', points: 10, count: 1, x: -1, y: -1 },
+  BLANK: { letter: 'BLANK', points: 0, count: 2, x: -1, y: -1 }
+};
 
 /*
 English-language editions of Scrabble contain 100 letter tiles, in the following distribution:

@@ -2,6 +2,7 @@ const sowpods = require('./sowpods.js');
 
 // this function returns a dictionary of all 2, 3, and 4 letter sequences which do not exist in any valid scrabble word.
 // the purpose of having this information is to speed up the scrabble ai by removing unnecessary iterations.
+// invalidSequences.ts was generated via shell command: node generateInvalidSequences.js >  invalidSequences.ts
 
 const sequences = {};
 const invalidSequences = {};

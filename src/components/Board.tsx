@@ -1,17 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { board } from '../game/board';
 import './Board.scss';
-import { tiles } from '../game/tiles';
+import { tileMap } from '../game/tiles';
 import { Tile } from './Tile';
+import { PlacedTiles } from '../game/types';
+import { generateAIMove } from '../ai/generateAIMove';
 // import { invalidSequences } from './invalidSequences';
 
 export const Board = () => {
-  const [placedTiles, setPlacedTiles] = useState<{[key:string]: string}>({
-    '6,7': 'R',
-    '7,7': 'I',
-    '8,7': 'C',
-    '9,7': 'E',
+  const [placedTiles, setPlacedTiles] = useState<PlacedTiles>({
+    '6,7': { ...tileMap['R'], x: 6, y: 7 },
+    '7,7': { ...tileMap['I'], x: 7, y: 7 },
+    '8,7': { ...tileMap['C'], x: 8, y: 7 },
+    '9,7': { ...tileMap['E'], x: 9, y: 7 },
   });
+
+  useEffect(() => {
+    generateAIMove(placedTiles, ['A', 'E', 'I', 'O', 'U', 'S', 'R']);
+  }, []);
 
   return (
     <div className='board'>
@@ -34,10 +40,13 @@ export const Board = () => {
               //   console.log(Object.keys(newCoordinates));
               // }}
             >
-              {/* ({square.x}, {square.y}) */}
+              <div style={{ position: 'absolute', top: 0, left: 0 }}>({square.x}, {square.y})</div>
               <div>{square.text}</div>
               {placedTiles[coordinateString] ? (
-                <Tile {...tiles[tiles.map(i => i.letter).indexOf(placedTiles[coordinateString])]} />
+                <Tile
+                  letter={placedTiles[coordinateString].letter}
+                  points={tileMap[placedTiles[coordinateString].letter].points}
+                />
               ) : null}
             </div>
           );
