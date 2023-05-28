@@ -1,0 +1,22 @@
+.tile {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  background: burlywood;
+  top: 2px;
+  left: 2px;
+  box-shadow: -2px -2px 16px black;
+  border-radius: 1px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .letter {
+    font-size: 42px;
+  }
+
+  .points {
+    font-size: 16px;
+    margin-top: 23px;
+  }
+}
