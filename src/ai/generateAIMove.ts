@@ -124,8 +124,8 @@ const generateAIMoves = (
     }
     placementCache[placementCacheId] = true;
 
-    let horizontalSequence = [placement];
-    let verticalSequence = [placement];
+    const horizontalSequence = [placement];
+    const verticalSequence = [placement];
     [[0, 1], [0, -1], [1, 0], [-1, 0]].forEach(i => {
       // find the horizontal and vertical sequence containing target square.
       let counter = 1;
@@ -186,7 +186,7 @@ const generateAIMoves = (
         placedTiles: newTempPlacedTiles,
         words: combinedNewSequences,
         score: generateMoveScore(combinedNewSequences)
-      })
+      });
     }
 
     // add the next letter.
