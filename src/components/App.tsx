@@ -37,15 +37,20 @@ const LetterDistribution = ({ placedTiles }:{ placedTiles:PlacedTiles }) => {
       <div>DISTRIBUTION</div>
       <br />
       <FlexContainer className='letter_counts'>
-        {[0, 13].map(offset => (
+        {[0, -1, 13].map(offset => offset === -1 ? ( // the "-1" is a placeholder div
+          <div style={{ width: '5px' }} />
+        ) : (
           <FlexContainer
             key={offset}
             className='letter_distribution_col'
             flexDirection='column'
             alignItems={offset ? 'flex-end' : 'flex-start'}
           >
-            {letterDistributionStrings.slice(0 + offset, 13 + offset).map((i, index) => (
-              <div key={index}>{i}</div>
+            {Object.values(tileMap).slice(0 + offset, 13 + offset).map((tile, index) => (
+              <FlexContainer key={index} justifyContent='space-between' className='letter_distribution_text'>
+                <div>{tile.letter}-</div>
+                <div>{placedTileCounts[tile.letter] || 0}/{tileMap[tile.letter].count}</div>
+              </FlexContainer>
             ))}
           </FlexContainer>
         ))}
