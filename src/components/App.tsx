@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Board } from './Board';
 import './App.scss';
 import { Tile } from './Tile';
-import { tileMap } from '../game/tiles';
+import { generateBag, tileMap } from '../game/tiles';
 import { FlexContainer } from './FlexContainer';
 import { PlacedTiles } from '../game/types';
+import { generateAIMove } from '../ai/generateAIMove';
 
 const Tiles = ({ tiles }:{ tiles:string[]}) => {
   return (
@@ -38,6 +39,7 @@ const LetterDistribution = ({ placedTiles }:{ placedTiles:PlacedTiles }) => {
       <FlexContainer className='letter_counts'>
         {[0, 13].map(offset => (
           <FlexContainer
+            key={offset}
             className='letter_distribution_col'
             flexDirection='column'
             alignItems={offset ? 'flex-end' : 'flex-start'}
@@ -50,13 +52,14 @@ const LetterDistribution = ({ placedTiles }:{ placedTiles:PlacedTiles }) => {
       </FlexContainer>
       <div>{letterDistributionStrings[letterDistributionStrings.length - 1]}</div>
     </FlexContainer>
-  )
-}
+  );
+};
 
 export const App = () => {
   // const [coordinates, setCoordinates] = useState<SquareCoordinateMap>({});
-  const [yourTiles, setYourTiles] = useState(['A', 'B', 'C', 'D', 'E', 'F', 'G']);
-  const [AITiles, setAITiles] = useState(['H', 'I', 'J', 'K', 'L', 'N', 'M']);
+  const bag = useRef(generateBag());
+  const [playerTiles, setPlayerTiles] = useState<string[]>([]);
+  const [AITiles, setAITiles] = useState<string[]>([]);
   const [placedTiles, setPlacedTiles] = useState<PlacedTiles>({
     '6,7': { ...tileMap['R'], x: 6, y: 7 },
     '7,7': { ...tileMap['I'], x: 7, y: 7 },
@@ -64,10 +67,53 @@ export const App = () => {
     '9,7': { ...tileMap['E'], x: 9, y: 7 },
   });
 
+  const drawTiles = (player:string, remainingTiles:string[]) => {
+    const newTiles = [...remainingTiles];
+    const numTilesToDraw = 7 - newTiles.length;
+    for (let i = 0; i < numTilesToDraw; i++) {
+      if (bag.current.length) {
+        const tile = bag.current.pop();
+        if (tile) {
+          newTiles.push(tile);
+        }
+      }
+    }
+    if (player === 'player') {
+      setPlayerTiles(newTiles);
+    } else {
+      setAITiles(newTiles);
+    }
+  };
+
+  useEffect(() => {
+    drawTiles('player', []);
+    drawTiles('AI', []);
+  }, []);
+
+  console.log('tiles left in bag: ', bag.current.length);
+
+  const handleButtonOnClick = () => {
+    const move = generateAIMove(placedTiles, AITiles);
+    if (move) {
+      setPlacedTiles({
+        ...placedTiles,
+        ...move.placedTiles
+      });
+      drawTiles('AI', move.remainingTiles);
+    } else {
+      console.log('no valid moves!');
+    }
+  };
+
   return (
     <div className='app'>
       <div className='game'>
-        <FlexContainer className='left_section' flexDirection='column' justifyContent='flex-end'>
+        <FlexContainer
+          className='left_section'
+          flexDirection='column'
+          justifyContent='flex-end'
+          alignItems='flex-end'
+        >
           <LetterDistribution placedTiles={placedTiles} />
         </FlexContainer>
         <FlexContainer
@@ -78,11 +124,18 @@ export const App = () => {
         >
           <Tiles tiles={AITiles} />
           <Board placedTiles={placedTiles} setPlacedTiles={setPlacedTiles} />
-          <Tiles tiles={yourTiles} />
+          <Tiles tiles={playerTiles} />
         </FlexContainer>
-        <div className='right_section'>
-          
-        </div>
+        <FlexContainer
+          className='right_section'
+          flexDirection='column'
+          justifyContent='flex-end'
+          alignItems='flex-start'
+        >
+          <div className='button' onClick={handleButtonOnClick}>
+            End Turn (Enter)
+          </div>
+        </FlexContainer>
       </div>
     </div>
   );

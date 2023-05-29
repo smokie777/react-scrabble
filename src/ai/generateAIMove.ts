@@ -15,9 +15,10 @@ const generatePlacementCacheId = (placements:Tile[]) => {
 };
 
 type moves = Array<{
-  placedTiles:PlacedTiles,
-  words:Tile[][],
-  score:number
+  placedTiles:PlacedTiles, // board state
+  words:Tile[][], // all words created by the move
+  score:number, // total score of move
+  remainingTiles:string[] // what tiles AI has left after the move
 }>
 const generateAIMoves = (
   placedTiles:PlacedTiles, // map of all tiles on the board
@@ -33,7 +34,7 @@ const generateAIMoves = (
   perfMetrics.depthsIterated[depth]++;
   perfMetrics.timesGenerateAIMovesCalled++;
 
-  // create an array of all possible ways to place one letter
+  // create an array "placements", of all possible ways to place one letter
   const tilesDeduped:string[] = uniq(tiles);
   const placements:Tile[] = [];
   if (depth === 0) {
@@ -80,7 +81,10 @@ const generateAIMoves = (
         ) {
         // if out of bounds, stop searching in that direction.
           return;
-        } else if (!placedTiles.hasOwnProperty(coordinateString)) {
+        } else if (
+          !placedTiles.hasOwnProperty(coordinateString)
+          && !tempPlacedTiles.hasOwnProperty(coordinateString)
+        ) {
           // if empty square is found, add placements, then proceed to the next direction.
           // eslint-disable-next-line no-loop-func
           tilesDeduped.forEach(tile => {
@@ -133,7 +137,7 @@ const generateAIMoves = (
             horizontalSequence.unshift(tile);
           }
           counter++;
-        } else { // if a blank (or edge of board) has been found, stop traveling in that direction.
+        } else { // if an empty tile (or edge of board) has been found, stop traveling in that direction.
           return; // return out of forEach() and continue with the next direction.
         }
       }
@@ -170,18 +174,19 @@ const generateAIMoves = (
     }
 
     // if all sequences are valid scrabble words, record a possible "move".
+    const newTiles = [...tiles];
+    newTiles.splice(newTiles.indexOf(placement.letter), 1);
     const combinedNewSequences = [...newHorizontalSequences, ...newVerticalSequences];
     if (!combinedNewSequences.filter(sequence => !sowpods.hasOwnProperty(sequence.map(i => i.letter).join(''))).length) {
       moves.push({
         placedTiles: newTempPlacedTiles,
         words: combinedNewSequences,
-        score: generateMovesScore(combinedNewSequences)
+        score: generateMovesScore(combinedNewSequences),
+        remainingTiles: newTiles
       });
     }
 
     // add the next letter.
-    const newTiles = [...tiles];
-    newTiles.splice(newTiles.indexOf(placement.letter), 1);
     perfMetrics.placementsFullyProcessed++;
     if (newTiles.length) {
       generateAIMoves(
@@ -228,7 +233,9 @@ export const generateAIMove = (
     })
   );
   console.log(`found ${moves.length} possible moves in ${timeTaken}ms`);
-  console.log(`the best move is "${fancyDisplayResult[0].stringifiedWords}", scoring ${fancyDisplayResult[0].score}`);
+  if (moves.length) {
+    console.log(`the best move is "${fancyDisplayResult[0].stringifiedWords}", scoring ${fancyDisplayResult[0].score}`);
+  }
   console.log(`perfMetrics: `, perfMetrics)
   console.log(`all possible moves here:`, keyBy(fancyDisplayResult, 'stringifiedWords'));
 

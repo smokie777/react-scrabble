@@ -1,4 +1,5 @@
 import { Tile } from './types';
+import { shuffle } from 'lodash';
 
 interface TileMap {
   [key:string]:Tile
@@ -7,12 +8,12 @@ export const tileMap:TileMap = {
   A: { letter: 'A', points: 1, count: 9, x: -1, y: -1 },
   B: { letter: 'B', points: 3, count: 2, x: -1, y: -1 },
   C: { letter: 'C', points: 3, count: 2, x: -1, y: -1 },
-  D: { letter: 'D', points: 2, count: 3, x: -1, y: -1 },
+  D: { letter: 'D', points: 2, count: 4, x: -1, y: -1 },
   E: { letter: 'E', points: 1, count: 12, x: -1, y: -1 },
   F: { letter: 'F', points: 4, count: 2, x: -1, y: -1 },
   G: { letter: 'G', points: 2, count: 3, x: -1, y: -1 },
   H: { letter: 'H', points: 4, count: 2, x: -1, y: -1 },
-  I: { letter: 'I', points: 1, count: 1, x: -1, y: -1 },
+  I: { letter: 'I', points: 1, count: 9, x: -1, y: -1 },
   J: { letter: 'J', points: 8, count: 1, x: -1, y: -1 },
   K: { letter: 'K', points: 5, count: 1, x: -1, y: -1 },
   L: { letter: 'L', points: 1, count: 4, x: -1, y: -1 },
@@ -30,7 +31,19 @@ export const tileMap:TileMap = {
   X: { letter: 'X', points: 8, count: 1, x: -1, y: -1 },
   Y: { letter: 'Y', points: 4, count: 2, x: -1, y: -1 },
   Z: { letter: 'Z', points: 10, count: 1, x: -1, y: -1 },
-  BLANK: { letter: 'BLANK', points: 0, count: 2, x: -1, y: -1 }
+  // BLANK: { letter: 'BLANK', points: 0, count: 2, x: -1, y: -1 }
+};
+
+export const generateBag = () => {
+  const bag:string[] = [];
+
+  Object.values(tileMap).forEach(tile => {
+    for (let i = 0; i < tile.count; i++) {
+      bag.push(tile.letter);
+    }
+  });
+
+  return shuffle(bag);
 };
 
 /*
