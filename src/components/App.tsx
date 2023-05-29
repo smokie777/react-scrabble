@@ -38,7 +38,7 @@ const LetterDistribution = ({ placedTiles }:{ placedTiles:PlacedTiles }) => {
       <br />
       <FlexContainer className='letter_counts'>
         {[0, -1, 13].map(offset => offset === -1 ? ( // the "-1" is a placeholder div
-          <div style={{ width: '5px' }} />
+          <div key={offset} style={{ width: '5px' }} />
         ) : (
           <FlexContainer
             key={offset}

@@ -6,6 +6,7 @@ import { twl06InvalidSequences } from '../game/twl06InvalidSequences';
 import { keyBy } from 'lodash';
 import { generateMovesScore } from './generateWordScore';
 
+const maxAITurnTime = 1000; // ms
 const directionMatrix = [[0, 1], [0, -1], [1, 0], [-1, 0]];
 
 const generatePlacementCacheId = (placements:Tile[]) => {
@@ -28,6 +29,7 @@ const generateAIMoves = (
   horizontalSequences:Tile[][], // all horizontal sequences generated so far
   verticalSequences:Tile[][], // all vertical sequences generated so far
   moves:moves, // array of all possible moves. populated by this function.
+  timeStart:number, // time first function call started in ms
   depth:number, // recursion depth, aka how many letters can the AI play at once.
   perfMetrics:{[key:string]:any} // performance metrics for development purposes only
 ) => {
@@ -188,7 +190,7 @@ const generateAIMoves = (
 
     // add the next letter.
     perfMetrics.placementsFullyProcessed++;
-    if (newTiles.length) {
+    if (newTiles.length && Date.now() - timeStart < maxAITurnTime) {
       generateAIMoves(
         placedTiles,
         newTiles,
@@ -197,6 +199,7 @@ const generateAIMoves = (
         newHorizontalSequences,
         newVerticalSequences,
         moves,
+        timeStart,
         depth + 1,
         perfMetrics
       );
@@ -220,7 +223,7 @@ export const generateAIMove = (
     depthsIterated: [0, 0, 0, 0, 0, 0, 0]
   };
 
-  generateAIMoves(placedTiles, tiles, {}, {}, [], [], moves, 0, perfMetrics);
+  generateAIMoves(placedTiles, tiles, {}, {}, [], [], moves, timeStart, 0, perfMetrics);
 
   moves.sort((a, b) => b.score - a.score);
 
