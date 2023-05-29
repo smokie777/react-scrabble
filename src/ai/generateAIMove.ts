@@ -1,8 +1,8 @@
 import { tileMap } from '../game/tiles';
 import { uniq } from 'lodash';
 import { PlacedTiles, Tile } from '../game/types';
-import { sowpods } from '../game/sowpods';
-import { invalidSequences } from '../game/invalidSequences';
+import { twl06 } from '../game/twl06';
+import { twl06InvalidSequences } from '../game/twl06InvalidSequences';
 import { keyBy } from 'lodash';
 import { generateMovesScore } from './generateWordScore';
 
@@ -147,8 +147,8 @@ const generateAIMoves = (
     let newHorizontalSequences = [...horizontalSequences];
     let newVerticalSequences = [...verticalSequences];
     if (
-      invalidSequences.hasOwnProperty(horizontalSequence.map(i => i.letter).join(''))
-      || invalidSequences.hasOwnProperty(verticalSequence.map(i => i.letter).join(''))
+      twl06InvalidSequences.hasOwnProperty(horizontalSequence.map(i => i.letter).join(''))
+      || twl06InvalidSequences.hasOwnProperty(verticalSequence.map(i => i.letter).join(''))
     ) {
       perfMetrics.placementsTerminatedDueToInvalidSequence++;
       return; // proceed to next placement
@@ -177,7 +177,7 @@ const generateAIMoves = (
     const newTiles = [...tiles];
     newTiles.splice(newTiles.indexOf(placement.letter), 1);
     const combinedNewSequences = [...newHorizontalSequences, ...newVerticalSequences];
-    if (!combinedNewSequences.filter(sequence => !sowpods.hasOwnProperty(sequence.map(i => i.letter).join(''))).length) {
+    if (!combinedNewSequences.filter(sequence => !twl06.hasOwnProperty(sequence.map(i => i.letter).join(''))).length) {
       moves.push({
         placedTiles: newTempPlacedTiles,
         words: combinedNewSequences,

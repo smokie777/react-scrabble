@@ -56,7 +56,6 @@ const LetterDistribution = ({ placedTiles }:{ placedTiles:PlacedTiles }) => {
 };
 
 export const App = () => {
-  // const [coordinates, setCoordinates] = useState<SquareCoordinateMap>({});
   const bag = useRef(generateBag());
   const [playerTiles, setPlayerTiles] = useState<string[]>([]);
   const [AITiles, setAITiles] = useState<string[]>([]);
