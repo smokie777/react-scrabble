@@ -1,12 +1,12 @@
 .board {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
-  width: 800px;
-  height: 800px;
   border: 1px solid black;
   cursor: default;
 
   .square {
+    width: 42px;
+    height: 42px;
     border: 1px solid black;
     display: flex;
     justify-content: center;
@@ -14,5 +14,28 @@
     font-size: 11px;
     text-align: center;
     position: relative;
+
+    .tile {
+      position: absolute;
+      height: 100%;
+      width: 100%;
+      background: burlywood;
+      top: 2px;
+      left: 2px;
+      box-shadow: -2px -2px 16px black;
+      border-radius: 1px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    
+      .letter {
+        font-size: 42px;
+      }
+    
+      .points {
+        font-size: 16px;
+        margin-top: 23px;
+      }
+    }    
   }  
 }

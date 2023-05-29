@@ -1,17 +1,35 @@
-@font-face {
-  font-family: 'Josefin Sans';
-  src: url('../fonts/JosefinSans-Regular.eot');
-  src: url('../fonts/JosefinSans-Regular.eot?#iefix') format('embedded-opentype'),
-      url('../fonts/JosefinSans-Regular.woff2') format('woff2'),
-      url('../fonts/JosefinSans-Regular.woff') format('woff'),
-      url('../fonts/JosefinSans-Regular.ttf') format('truetype'),
-      url('../fonts/JosefinSans-Regular.svg#JosefinSans-Regular') format('svg');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
 .app {
   background: bisque;
-  font-family: 'Josefin Sans', sans-serif;
+  height: 100%;
+  width: 100%;
+  padding: 5px;
+
+  .game {
+    border: 2px solid black;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+
+    .tiles {
+      display: flex;
+
+      .tile {
+        width: 40px;
+        height: 40px;
+      }
+    }
+  }
+}
+
+.letter_distribution {
+  font-size: 14px;
+  margin: 40px;
+
+  .letter_counts {
+    width: 100%;
+
+    .letter_distribution_col {
+      width: 50%;
+    }
+  }  
 }

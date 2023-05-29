@@ -7,16 +7,15 @@ import { PlacedTiles } from '../game/types';
 import { generateAIMove } from '../ai/generateAIMove';
 // import { invalidSequences } from './invalidSequences';
 
-export const Board = () => {
-  const [placedTiles, setPlacedTiles] = useState<PlacedTiles>({
-    '6,7': { ...tileMap['R'], x: 6, y: 7 },
-    '7,7': { ...tileMap['I'], x: 7, y: 7 },
-    '8,7': { ...tileMap['C'], x: 8, y: 7 },
-    '9,7': { ...tileMap['E'], x: 9, y: 7 },
-  });
-
+export const Board = ({
+   placedTiles,
+   setPlacedTiles
+}:{
+  placedTiles:PlacedTiles,
+  setPlacedTiles:Function
+}) => {
   useEffect(() => {
-    generateAIMove(placedTiles, ['A', 'E', 'I', 'O', 'U', 'S', 'R']);
+    // generateAIMove(placedTiles, ['A', 'E', 'I', 'O', 'U', 'S', 'R']);
   }, []);
 
   return (
