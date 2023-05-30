@@ -1,3 +1,13 @@
+export interface Log {
+  turn:number,
+  action:string,
+  words:{
+    word:string,
+    score:number
+  }[],
+  score:number
+}
+
 export interface Tile {
   letter:string,
   points:number,

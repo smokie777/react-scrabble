@@ -1,8 +1,3 @@
-body, html, #root {
-	height: 100%;
-  font-family: 'Josefin Sans', sans-serif;
-}
-
 @font-face {
   font-family: 'Josefin Sans';
   src: url('../fonts/JosefinSans-Regular.eot');
@@ -14,4 +9,13 @@ body, html, #root {
   font-weight: normal;
   font-style: normal;
   font-display: swap;
+}
+
+body, html, #root {
+	height: 100%;
+  font-family: 'Josefin Sans', sans-serif;
+}
+
+.bold {
+  font-weight: bold;
 }

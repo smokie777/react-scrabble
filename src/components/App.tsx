@@ -2,14 +2,17 @@ import { useState, useRef, useEffect } from 'react';
 import { Board } from './Board';
 import './App.scss';
 import { Tiles } from './Tiles';
+import { Logs } from './Logs';
 import { LetterDistribution } from './LetterDistribution';
 import { generateBag, tileMap } from '../game/tiles';
 import { FlexContainer } from './FlexContainer';
-import { PlacedTiles } from '../game/types';
+import { Log, PlacedTiles } from '../game/types';
 import { generateAIMove } from '../ai/generateAIMove';
+import { generateWordScore } from '../ai/generateWordScore';
 
 export const App = () => {
-  const bag = useRef(generateBag());
+  const bagRef = useRef(generateBag());
+  const turnRef = useRef(1);
   const [playerTiles, setPlayerTiles] = useState<string[]>([]);
   const [AITiles, setAITiles] = useState<string[]>([]);
   const [placedTiles, setPlacedTiles] = useState<PlacedTiles>({
@@ -18,13 +21,14 @@ export const App = () => {
     '8,7': { ...tileMap['C'], x: 8, y: 7 },
     '9,7': { ...tileMap['E'], x: 9, y: 7 },
   });
+  const [logs, setLogs] = useState<Log[]>([]);
 
   const drawTiles = (player:string, remainingTiles:string[]) => {
     const newTiles = [...remainingTiles];
     const numTilesToDraw = 7 - newTiles.length;
     for (let i = 0; i < numTilesToDraw; i++) {
-      if (bag.current.length) {
-        const tile = bag.current.pop();
+      if (bagRef.current.length) {
+        const tile = bagRef.current.pop();
         if (tile) {
           newTiles.push(tile);
         }
@@ -42,8 +46,6 @@ export const App = () => {
     drawTiles('AI', []);
   }, []);
 
-  console.log('tiles left in bag: ', bag.current.length);
-
   const handleButtonOnClick = () => {
     const move = generateAIMove(placedTiles, AITiles);
     if (move) {
@@ -52,9 +54,26 @@ export const App = () => {
         ...move.placedTiles
       });
       drawTiles('AI', move.remainingTiles);
+      const log:Log = {
+        turn: turnRef.current,
+        action: 'move',
+        words: move.words.map(word => ({
+          word: word.map(tile => tile.letter).join(''),
+          score: generateWordScore(word)
+        })),
+        score: move.score
+      };
+      setLogs([...logs, log])
     } else {
-      console.log('no valid moves!');
+      const log:Log = {
+        turn: turnRef.current,
+        action: 'pass',
+        words: [],
+        score: 0
+      };
+      setLogs([...logs, log]);
     }
+    turnRef.current++;
   };
 
   return (
@@ -82,8 +101,9 @@ export const App = () => {
           className='right_section'
           flexDirection='column'
           justifyContent='flex-end'
-          alignItems='flex-start'
+          alignItems='center'
         >
+          <Logs logs={logs} />
           <div className='button' onClick={handleButtonOnClick}>
             End Turn (Enter)
           </div>

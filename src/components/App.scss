@@ -23,7 +23,10 @@
 
 .letter_distribution {
   font-size: 14px;
-  margin: 40px;
+  margin: 20px;
+  border: 2px solid black;
+  box-sizing: border-box;
+  padding: 3px;
   width: fit-content;
 
   .letter_counts {
@@ -37,7 +40,7 @@
         width: 100%;
       }
     }
-  }  
+  }
 }
 
 .left_section, .right_section {
@@ -50,7 +53,28 @@
   height: 50px;
   line-height: 50px;
   background: lightgreen;
-  margin: 40px;
+  margin: 20px;
+  margin-top: 0;
   border-radius: 10px;
   text-align: center;
+}
+
+.logs {
+  width: 260px;
+  height: 400px;
+  margin: 20px;
+  border: 2px solid black;
+  box-sizing: border-box;
+  padding: 3px;
+  overflow-y: scroll;
+
+  .log {
+    margin-bottom: 3px;
+  }
+  
+  .dictionary_api_connected_word {
+    text-decoration: underline;
+    color: darkblue;
+    cursor: pointer;
+  }
 }
