@@ -16,6 +16,10 @@
       .tile {
         width: 40px;
         height: 40px;
+
+        &.hidden {
+          opacity: 0;
+        }
       }
     }
   }

@@ -14,11 +14,11 @@ export interface Tile {
   count:number,
   x:number,
   y:number,
-
 }
 export interface PlacedTiles {
   [key:string]:Tile
 };
+export type Tiles = (string|null)[];
 
 export interface Square {
   text:string;

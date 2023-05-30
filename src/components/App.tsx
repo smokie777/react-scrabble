@@ -6,15 +6,15 @@ import { Logs } from './Logs';
 import { LetterDistribution } from './LetterDistribution';
 import { generateBag, tileMap } from '../game/tiles';
 import { FlexContainer } from './FlexContainer';
-import { Log, PlacedTiles } from '../game/types';
+import { Log, PlacedTiles, Tiles as TilesType } from '../game/types';
 import { generateAIMove } from '../ai/generateAIMove';
 import { generateWordScore } from '../ai/generateWordScore';
 
 export const App = () => {
-  const bagRef = useRef(generateBag());
+  const bagRef = useRef(generateBag().slice(0, 20));
   const turnRef = useRef(1);
-  const [playerTiles, setPlayerTiles] = useState<string[]>([]);
-  const [AITiles, setAITiles] = useState<string[]>([]);
+  const [playerTiles, setPlayerTiles] = useState<TilesType>(Array(7).fill(null));
+  const [AITiles, setAITiles] = useState<TilesType>(Array(7).fill(null));
   const [placedTiles, setPlacedTiles] = useState<PlacedTiles>({
     '6,7': { ...tileMap['R'], x: 6, y: 7 },
     '7,7': { ...tileMap['I'], x: 7, y: 7 },
@@ -23,14 +23,13 @@ export const App = () => {
   });
   const [logs, setLogs] = useState<Log[]>([]);
 
-  const drawTiles = (player:string, remainingTiles:string[]) => {
-    const newTiles = [...remainingTiles];
-    const numTilesToDraw = 7 - newTiles.length;
-    for (let i = 0; i < numTilesToDraw; i++) {
-      if (bagRef.current.length) {
+  const drawTiles = (player:string, remainingTiles:TilesType) => {
+    const newTiles:TilesType = [...remainingTiles];
+    for (let i = 0; i < 7; i++) {
+      if (bagRef.current.length && newTiles[i] === null) {
         const tile = bagRef.current.pop();
         if (tile) {
-          newTiles.push(tile);
+          newTiles[i] = tile;
         }
       }
     }
@@ -42,18 +41,33 @@ export const App = () => {
   };
 
   useEffect(() => {
-    drawTiles('player', []);
-    drawTiles('AI', []);
+    drawTiles('player', playerTiles);
+    drawTiles('AI', AITiles);
   }, []);
 
   const handleButtonOnClick = () => {
-    const move = generateAIMove(placedTiles, AITiles);
+    const processedAITiles:string[] = [];
+    AITiles.forEach(i => {
+      if (i !== null) {
+        processedAITiles.push(i)
+      }
+    });
+    processedAITiles.sort((a, b) => tileMap[b].points - tileMap[a].points);
+    const move = generateAIMove(placedTiles, processedAITiles);
     if (move) {
       setPlacedTiles({
         ...placedTiles,
         ...move.placedTiles
       });
-      drawTiles('AI', move.remainingTiles);
+      const remainingTiles:TilesType = [];
+      for (let i = 0; i < 7; i++) {
+        if (move.remainingTiles[i]) {
+          remainingTiles.push(move.remainingTiles[i]);
+        } else {
+          remainingTiles.push(null);
+        }
+      }
+      drawTiles('AI', remainingTiles);
       const log:Log = {
         turn: turnRef.current,
         action: 'move',

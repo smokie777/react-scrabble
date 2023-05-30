@@ -54,7 +54,7 @@ export const Logs = ({ logs }:{ logs:Log[] }) => (
       } else if (log.action === 'pass') {
         logComponent = (
           <div key={index} className='log'>
-            Turn {log.turn}: AI passed.
+            <span className='bold'>Turn {log.turn}:</span> AI passed.
           </div>
         );
       }
