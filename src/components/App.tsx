@@ -9,19 +9,50 @@ import { FlexContainer } from './FlexContainer';
 import { Log, PlacedTiles, Tiles as TilesType } from '../game/types';
 import { generateAIMove } from '../ai/generateAIMove';
 import { generateWordScore } from '../ai/generateWordScore';
+import { generateCoordinatesForPossiblePlacements } from '../ai/generateCoordinatesForPossiblePlacements';
 
 export const App = () => {
-  const bagRef = useRef(generateBag().slice(0, 20));
-  const turnRef = useRef(1);
   const [playerTiles, setPlayerTiles] = useState<TilesType>(Array(7).fill(null));
   const [AITiles, setAITiles] = useState<TilesType>(Array(7).fill(null));
   const [placedTiles, setPlacedTiles] = useState<PlacedTiles>({
-    '6,7': { ...tileMap['R'], x: 6, y: 7 },
-    '7,7': { ...tileMap['I'], x: 7, y: 7 },
-    '8,7': { ...tileMap['C'], x: 8, y: 7 },
-    '9,7': { ...tileMap['E'], x: 9, y: 7 },
+    // '6,7': { ...tileMap['R'], x: 6, y: 7 },
+    // '7,7': { ...tileMap['I'], x: 7, y: 7 },
+    // '8,7': { ...tileMap['C'], x: 8, y: 7 },
+    // '9,7': { ...tileMap['E'], x: 9, y: 7 },
   });
+  const [tempPlacedTiles, setTempPlacedTiles] = useState<PlacedTiles>({});
   const [logs, setLogs] = useState<Log[]>([]);
+  const [selectedTileIndex, setSelectedTileIndex] = useState(-1);
+
+  const bagRef = useRef(generateBag());
+  const turnRef = useRef(1);
+  const possiblePlacementCoordinatesRef = useRef([{ x: 7, y: 7 }]); // defaults to the center tile only.
+  const possiblePlacementsMap:{[key:string]:Boolean} = {};
+  possiblePlacementCoordinatesRef.current.forEach(i => {
+    possiblePlacementsMap[`${i.x},${i.y}`] = true;
+  });
+
+  const placeSelectedTile = (x:number, y:number) => {
+    const coordinateString = `${x},${y}`;
+    if (possiblePlacementsMap[coordinateString]) {
+      const letter = playerTiles[selectedTileIndex];
+      if (typeof letter === 'string') {
+        const newTempPlacedTiles = {
+          ...tempPlacedTiles,
+          [coordinateString]: { ...tileMap[letter], x, y }
+        };
+        possiblePlacementCoordinatesRef.current = generateCoordinatesForPossiblePlacements(
+          placedTiles,
+          newTempPlacedTiles
+        );
+        setTempPlacedTiles(newTempPlacedTiles);
+        const newPlayerTiles = [...playerTiles];
+        newPlayerTiles[selectedTileIndex] = null;
+        setPlayerTiles(newPlayerTiles);
+        setSelectedTileIndex(-1);
+      }
+    }
+  };
 
   const drawTiles = (player:string, remainingTiles:TilesType) => {
     const newTiles:TilesType = [...remainingTiles];
@@ -55,10 +86,12 @@ export const App = () => {
     processedAITiles.sort((a, b) => tileMap[b].points - tileMap[a].points);
     const move = generateAIMove(placedTiles, processedAITiles);
     if (move) {
-      setPlacedTiles({
+      const newPlacedTiles = {
         ...placedTiles,
         ...move.placedTiles
-      });
+      };
+      setPlacedTiles(newPlacedTiles);
+      possiblePlacementCoordinatesRef.current = generateCoordinatesForPossiblePlacements(newPlacedTiles, {});
       const remainingTiles:TilesType = [];
       for (let i = 0; i < 7; i++) {
         if (move.remainingTiles[i]) {
@@ -108,8 +141,17 @@ export const App = () => {
           alignItems='center'
         >
           <Tiles tiles={AITiles} />
-          <Board placedTiles={placedTiles} setPlacedTiles={setPlacedTiles} />
-          <Tiles tiles={playerTiles} />
+          <Board
+            placedTiles={placedTiles}
+            tempPlacedTiles={tempPlacedTiles}
+            placeSelectedTile={placeSelectedTile}
+            highlightedSquaresMap={selectedTileIndex === -1 ? {} : possiblePlacementsMap}
+          />
+          <Tiles
+            tiles={playerTiles}
+            selectedTileIndex={selectedTileIndex}
+            setSelectedTileIndex={setSelectedTileIndex}
+          />
         </FlexContainer>
         <FlexContainer
           className='right_section'

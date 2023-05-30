@@ -1,56 +1,51 @@
-import { useState, useEffect } from 'react';
 import { board } from '../game/board';
 import './Board.scss';
 import { tileMap } from '../game/tiles';
 import { Tile } from './Tile';
 import { PlacedTiles } from '../game/types';
-import { generateAIMove } from '../ai/generateAIMove';
-// import { invalidSequences } from './invalidSequences';
 
 export const Board = ({
    placedTiles,
-   setPlacedTiles
+   tempPlacedTiles,
+   placeSelectedTile,
+   highlightedSquaresMap
 }:{
   placedTiles:PlacedTiles,
-  setPlacedTiles:Function
-}) => {
-  useEffect(() => {
-    // generateAIMove(placedTiles, ['A', 'E', 'I', 'O', 'U', 'S', 'R']);
-  }, []);
-
-  return (
-    <div className='board'>
-      {board.map(row => (
-        row.map(square => {
-          const coordinateString = `${square.x},${square.y}`;
-          return (
-            <div
-              key={coordinateString}
-              className='square'
-              style={{ background: square.color }}
-              // onClick={() => {
-              //   const newCoordinates = { ...coordinates };
-              //   if (coordinates[coordinateString]) {
-              //     delete newCoordinates[coordinateString];
-              //   } else {
-              //     newCoordinates[coordinateString] = square;
-              //   }
-              //   setCoordinates(newCoordinates);
-              //   console.log(Object.keys(newCoordinates));
-              // }}
-            >
-              <div style={{ position: 'absolute', top: 0, left: 0 }}>({square.x}, {square.y})</div>
-              <div>{square.text}</div>
-              {placedTiles[coordinateString] ? (
-                <Tile
-                  letter={placedTiles[coordinateString].letter}
-                  points={tileMap[placedTiles[coordinateString].letter].points}
-                />
-              ) : null}
-            </div>
-          );
-        })
-      ))}
-    </div>
-  )
-};
+  tempPlacedTiles:PlacedTiles,
+  placeSelectedTile:Function,
+  highlightedSquaresMap:{[key:string]:Boolean}
+}) => (
+  <div className='board'>
+    {board.map(row => (
+      row.map(square => {
+        const coordinateString = `${square.x},${square.y}`;
+        return (
+          <div
+            key={coordinateString}
+            className='square'
+            style={{
+              background: square.color,
+              border: highlightedSquaresMap[coordinateString] ? '1px solid yellow' : '1px solid black'
+            }}
+            onClick={() => placeSelectedTile(square.x, square.y)}
+          >
+            <div style={{ position: 'absolute', top: 0, left: 0 }}>({square.x}, {square.y})</div>
+            <div>{square.text}</div>
+            {placedTiles[coordinateString] ? (
+              <Tile
+                letter={placedTiles[coordinateString].letter}
+                points={tileMap[placedTiles[coordinateString].letter].points}
+              />
+            ) : null}
+            {tempPlacedTiles[coordinateString] ? (
+              <Tile
+                letter={tempPlacedTiles[coordinateString].letter}
+                points={tileMap[tempPlacedTiles[coordinateString].letter].points}
+              />
+            ) : null}
+          </div>
+        );
+      })
+    ))}
+  </div>
+);
