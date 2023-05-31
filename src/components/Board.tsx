@@ -8,12 +8,12 @@ export const Board = ({
    placedTiles,
    tempPlacedTiles,
    placeSelectedTile,
-   highlightedSquaresMap
+   unplaceSelectedTiles
 }:{
   placedTiles:PlacedTiles,
   tempPlacedTiles:PlacedTiles,
   placeSelectedTile:Function,
-  highlightedSquaresMap:{[key:string]:Boolean}
+  unplaceSelectedTiles:Function
 }) => (
   <div className='board'>
     {board.map(row => (
@@ -23,11 +23,14 @@ export const Board = ({
           <div
             key={coordinateString}
             className='square'
-            style={{
-              background: square.color,
-              border: highlightedSquaresMap[coordinateString] ? '1px solid yellow' : '1px solid black'
+            style={{ background: square.color }}
+            onClick={() => {
+              if (tempPlacedTiles.hasOwnProperty(coordinateString)) {
+                unplaceSelectedTiles([`${square.x},${square.y}`]);
+              } else if (!placedTiles.hasOwnProperty(coordinateString)) {
+                placeSelectedTile(square.x, square.y)
+              }
             }}
-            onClick={() => placeSelectedTile(square.x, square.y)}
           >
             <div style={{ position: 'absolute', top: 0, left: 0 }}>({square.x}, {square.y})</div>
             <div>{square.text}</div>

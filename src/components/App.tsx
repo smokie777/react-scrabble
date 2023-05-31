@@ -9,7 +9,7 @@ import { FlexContainer } from './FlexContainer';
 import { Log, PlacedTiles, Tiles as TilesType } from '../game/types';
 import { generateAIMove } from '../ai/generateAIMove';
 import { generateWordScore } from '../ai/generateWordScore';
-import { generateCoordinatesForPossiblePlacements } from '../ai/generateCoordinatesForPossiblePlacements';
+import { generatePlayerMove } from '../ai/generatePlayerMove';
 
 export const App = () => {
   const [playerTiles, setPlayerTiles] = useState<TilesType>(Array(7).fill(null));
@@ -25,32 +25,34 @@ export const App = () => {
   const [selectedTileIndex, setSelectedTileIndex] = useState(-1);
 
   const bagRef = useRef(generateBag());
-  const turnRef = useRef(1);
-  const possiblePlacementCoordinatesRef = useRef([{ x: 7, y: 7 }]); // defaults to the center tile only.
-  const possiblePlacementsMap:{[key:string]:Boolean} = {};
-  possiblePlacementCoordinatesRef.current.forEach(i => {
-    possiblePlacementsMap[`${i.x},${i.y}`] = true;
-  });
+  const turnRef = useRef(1); // odd turns are player's turns, even turns are AI's
+
+  const unplaceSelectedTiles = (coordinates:string[]) => {
+    // remove player's placed tile from board and put it back into player's hand
+    const newPlayerTiles = [...playerTiles];
+    const newTempPlacedTiles = { ...tempPlacedTiles };
+    coordinates.forEach(coordinateString => {
+      delete newTempPlacedTiles[coordinateString];
+      newPlayerTiles[newPlayerTiles.indexOf(null)] = tempPlacedTiles[coordinateString].letter;
+    });
+    setPlayerTiles(newPlayerTiles);
+    setTempPlacedTiles(newTempPlacedTiles);
+  };
 
   const placeSelectedTile = (x:number, y:number) => {
+    // place tile from player's hand onto the board
     const coordinateString = `${x},${y}`;
-    if (possiblePlacementsMap[coordinateString]) {
-      const letter = playerTiles[selectedTileIndex];
-      if (typeof letter === 'string') {
-        const newTempPlacedTiles = {
-          ...tempPlacedTiles,
-          [coordinateString]: { ...tileMap[letter], x, y }
-        };
-        possiblePlacementCoordinatesRef.current = generateCoordinatesForPossiblePlacements(
-          placedTiles,
-          newTempPlacedTiles
-        );
-        setTempPlacedTiles(newTempPlacedTiles);
-        const newPlayerTiles = [...playerTiles];
-        newPlayerTiles[selectedTileIndex] = null;
-        setPlayerTiles(newPlayerTiles);
-        setSelectedTileIndex(-1);
-      }
+    const letter = playerTiles[selectedTileIndex];
+    if (typeof letter === 'string') {
+      const newTempPlacedTiles = {
+        ...tempPlacedTiles,
+        [coordinateString]: { ...tileMap[letter], x, y }
+      };
+      setTempPlacedTiles(newTempPlacedTiles);
+      const newPlayerTiles = [...playerTiles];
+      newPlayerTiles[selectedTileIndex] = null;
+      setPlayerTiles(newPlayerTiles);
+      setSelectedTileIndex(-1);
     }
   };
 
@@ -74,52 +76,83 @@ export const App = () => {
   useEffect(() => {
     drawTiles('player', playerTiles);
     drawTiles('AI', AITiles);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleButtonOnClick = () => {
-    const processedAITiles:string[] = [];
-    AITiles.forEach(i => {
-      if (i !== null) {
-        processedAITiles.push(i)
-      }
-    });
-    processedAITiles.sort((a, b) => tileMap[b].points - tileMap[a].points);
-    const move = generateAIMove(placedTiles, processedAITiles);
-    if (move) {
-      const newPlacedTiles = {
-        ...placedTiles,
-        ...move.placedTiles
-      };
-      setPlacedTiles(newPlacedTiles);
-      possiblePlacementCoordinatesRef.current = generateCoordinatesForPossiblePlacements(newPlacedTiles, {});
-      const remainingTiles:TilesType = [];
-      for (let i = 0; i < 7; i++) {
-        if (move.remainingTiles[i]) {
-          remainingTiles.push(move.remainingTiles[i]);
-        } else {
-          remainingTiles.push(null);
+    if (turnRef.current % 2 === 0) {
+      // AI turn - play
+      const processedAITiles:string[] = [];
+      AITiles.forEach(i => {
+        if (i !== null) {
+          processedAITiles.push(i)
         }
+      });
+      processedAITiles.sort((a, b) => tileMap[b].points - tileMap[a].points);
+      const move = generateAIMove(placedTiles, processedAITiles);
+      if (move) {
+        const newPlacedTiles = {
+          ...placedTiles,
+          ...move.placedTiles
+        };
+        setPlacedTiles(newPlacedTiles);
+        const remainingTiles:TilesType = [];
+        for (let i = 0; i < 7; i++) {
+          if (move.AIRemainingTiles[i]) {
+            remainingTiles.push(move.AIRemainingTiles[i]);
+          } else {
+            remainingTiles.push(null);
+          }
+        }
+        drawTiles('AI', remainingTiles);
+        const log:Log = {
+          turn: turnRef.current,
+          action: 'move',
+          words: move.words.map(word => ({
+            word: word.map(tile => tile.letter).join(''),
+            score: generateWordScore(placedTiles, word)
+          })),
+          score: move.score
+        };
+        setLogs([...logs, log])
+      } else {
+        // AI turn - pass
+        const log:Log = {
+          turn: turnRef.current,
+          action: 'pass',
+          words: [],
+          score: 0
+        };
+        setLogs([...logs, log]);
       }
-      drawTiles('AI', remainingTiles);
-      const log:Log = {
-        turn: turnRef.current,
-        action: 'move',
-        words: move.words.map(word => ({
-          word: word.map(tile => tile.letter).join(''),
-          score: generateWordScore(word)
-        })),
-        score: move.score
-      };
-      setLogs([...logs, log])
     } else {
-      const log:Log = {
-        turn: turnRef.current,
-        action: 'pass',
-        words: [],
-        score: 0
-      };
-      setLogs([...logs, log]);
+      const move = generatePlayerMove(placedTiles, tempPlacedTiles)[0];
+      if (move) {
+        // player turn - play
+        const newPlacedTiles = {
+          ...placedTiles,
+          ...move.placedTiles
+        };
+        setPlacedTiles(newPlacedTiles);
+        setTempPlacedTiles({});
+        drawTiles('player', playerTiles);
+        const log:Log = {
+          turn: turnRef.current,
+          action: 'move',
+          words: move.words.map(word => ({
+            word: word.map(tile => tile.letter).join(''),
+            score: generateWordScore(placedTiles, word)
+          })),
+          score: move.score
+        };
+        setLogs([...logs, log])
+        return; //testing
+      } else {
+        // player turn - play invalid word
+        return unplaceSelectedTiles(Object.keys(tempPlacedTiles));
+      }
     }
+
     turnRef.current++;
   };
 
@@ -145,7 +178,7 @@ export const App = () => {
             placedTiles={placedTiles}
             tempPlacedTiles={tempPlacedTiles}
             placeSelectedTile={placeSelectedTile}
-            highlightedSquaresMap={selectedTileIndex === -1 ? {} : possiblePlacementsMap}
+            unplaceSelectedTiles={unplaceSelectedTiles}
           />
           <Tiles
             tiles={playerTiles}
@@ -161,7 +194,7 @@ export const App = () => {
         >
           <Logs logs={logs} />
           <div className='button' onClick={handleButtonOnClick}>
-            End Turn (Enter)
+            Click me! (Enter)
           </div>
         </FlexContainer>
       </div>

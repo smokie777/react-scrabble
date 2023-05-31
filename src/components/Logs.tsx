@@ -37,7 +37,8 @@ export const Logs = ({ logs }:{ logs:Log[] }) => (
       if (log.action === 'move') {
         logComponent = (
           <div key={index} className='log'>
-            <span className='bold'>Turn {log.turn}:</span> AI played {log.words.map((i, index) => (
+            <span className='bold'>Turn {log.turn}: </span>
+            {log.turn % 2 === 0 ? 'AI' : 'Player'} played {log.words.map((i, index) => (
               <span key={index}>
                 <span
                   className='dictionary_api_connected_word'
@@ -54,7 +55,7 @@ export const Logs = ({ logs }:{ logs:Log[] }) => (
       } else if (log.action === 'pass') {
         logComponent = (
           <div key={index} className='log'>
-            <span className='bold'>Turn {log.turn}:</span> AI passed.
+            <span className='bold'>Turn {log.turn}:</span> {log.turn % 2 === 0 ? 'AI' : 'Player'} passed.
           </div>
         );
       }

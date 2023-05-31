@@ -1,6 +1,6 @@
 import { tileMap } from '../game/tiles';
 import { uniq } from 'lodash';
-import { PlacedTiles, Tile } from '../game/types';
+import { PlacedTiles, Tile, Moves } from '../game/types';
 import { twl06 } from '../game/twl06';
 import { twl06InvalidSequences } from '../game/twl06InvalidSequences';
 import { keyBy } from 'lodash';
@@ -20,12 +20,6 @@ const generatePlacementCacheId = (placements:Tile[]) => {
   return placementCacheIdArr.join('_');
 };
 
-type moves = Array<{
-  placedTiles:PlacedTiles, // board state
-  words:Tile[][], // all words created by the move
-  score:number, // total score of move
-  remainingTiles:string[] // what tiles AI has left after the move
-}>
 // generateAIMoves uses DFS recursion, with "depth" referring to the length of the word being generated.
 const generateAIMoves = ( 
   placedTiles:PlacedTiles, // map of all tiles on the board
@@ -34,7 +28,7 @@ const generateAIMoves = (
   placementCache:{[key:string]:boolean}, // cache of all already-explored placements to prevent dupes
   horizontalSequences:Tile[][], // all horizontal sequences generated so far
   verticalSequences:Tile[][], // all vertical sequences generated so far
-  moves:moves, // array of all possible moves. populated by this function.
+  moves:Moves, // array of all possible moves. populated by this function.
   timeStart:number, // time first function call started in ms
   perfMetrics:{[key:string]:any} // performance metrics for development purposes only
 ) => {
@@ -123,8 +117,8 @@ const generateAIMoves = (
         moves.push({
           placedTiles: newTempPlacedTiles,
           words: combinedNewSequences,
-          score: generateMovesScore(combinedNewSequences),
-          remainingTiles: newTiles
+          score: generateMovesScore(placedTiles, combinedNewSequences),
+          AIRemainingTiles: newTiles
         });
       }
 
@@ -153,7 +147,7 @@ export const generateAIMove = (
 ) => {
   const timeStart = Date.now();
 
-  const moves:moves = [];
+  const moves:Moves = [];
   const perfMetrics:{[key:string]:any} = {
     placementsTotalAttempted: 0,
     placementsSkippedDueToCaching: 0,
