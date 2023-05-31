@@ -97,7 +97,11 @@ export const generatePlayerMove = (
     moves.push({
       placedTiles: tempPlacedTiles,
       words: sequences,
-      score: generateMovesScore(placedTiles, sequences),
+      score: generateMovesScore(
+        placedTiles,
+        sequences,
+        Object.keys(tempPlacedTiles).length
+      ),
       AIRemainingTiles: []
     });
   }

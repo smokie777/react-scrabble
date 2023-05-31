@@ -118,7 +118,11 @@ const generateAIMoves = (
         moves.push({
           placedTiles: newTempPlacedTiles,
           words: combinedNewSequences,
-          score: generateMovesScore(placedTiles, combinedNewSequences),
+          score: generateMovesScore(
+            placedTiles,
+            combinedNewSequences,
+            Object.keys(newTempPlacedTiles).length
+          ),
           AIRemainingTiles: newTiles
         });
       }

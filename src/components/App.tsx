@@ -13,8 +13,10 @@ import { generatePlayerMove } from '../ai/generatePlayerMove';
 import { generateCoordinateString } from '../game/generateCoordinateString';
 
 export const App = () => {
-  const [playerTiles, setPlayerTiles] = useState<TilesType>(Array(7).fill(null));
-  const [AITiles, setAITiles] = useState<TilesType>(Array(7).fill(null));
+  // const [playerTiles, setPlayerTiles] = useState<TilesType>(Array(7).fill(null));
+  const [playerTiles, setPlayerTiles] = useState<TilesType>('GOGOGOO'.split(''));
+  // const [AITiles, setAITiles] = useState<TilesType>(Array(7).fill(null));
+  const [AITiles, setAITiles] = useState<TilesType>('ROASTIN'.split(''));
   const [placedTiles, setPlacedTiles] = useState<PlacedTiles>({
     // '6,7': { ...tileMap['R'], x: 6, y: 7 },
     // '7,7': { ...tileMap['I'], x: 7, y: 7 },
@@ -106,7 +108,8 @@ export const App = () => {
           word: word.map(tile => tile.letter).join(''),
           score: generateWordScore(placedTiles, word)
         })),
-        score: AIMove.score
+        score: AIMove.score,
+        isBingo: Object.keys(AIMove.placedTiles).length === 7
       };
       setLogs([...logs, log]);
     } else {
@@ -115,7 +118,8 @@ export const App = () => {
         turn,
         action: 'pass',
         words: [],
-        score: 0
+        score: 0,
+        isBingo: false
       };
       setLogs([...logs, log]);
     }
@@ -145,7 +149,8 @@ export const App = () => {
           word: word.map(tile => tile.letter).join(''),
           score: generateWordScore(placedTiles, word)
         })),
-        score: playerMove.score
+        score: playerMove.score,
+        isBingo: Object.keys(playerMove.placedTiles).length === 7
       };
       setLogs([...logs, log]);
     } else {

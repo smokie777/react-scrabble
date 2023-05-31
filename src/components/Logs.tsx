@@ -52,10 +52,11 @@ export const Logs = ({ logs }:{ logs:Log[] }) => (
                 >
                 {i.word}
                 </span>
-                <span> ({i.score} pts){index === log.words.length - 1 ? ' = ' : ' + '}</span>
+                <span> ({i.score} pts){index === log.words.length - 1 ? null : ' + '}</span>
               </span>
             ))}
-            ({log.score} pts)
+            {log.isBingo ? <span> + <span className='bingo'>Bingo Bonus!</span> (50)</span> : null}
+            &nbsp;= ({log.score} pts)
           </div>
         );
       } else if (log.action === 'pass') {

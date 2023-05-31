@@ -22,7 +22,12 @@ export const generateWordScore = (placedTiles:PlacedTiles, word:Tile[]) => {
   return baseWordScore;
 };
 
-export const generateMovesScore = (placedTiles:PlacedTiles, words:Tile[][]) => words
+export const generateMovesScore = (
+  placedTiles:PlacedTiles,
+  words:Tile[][],
+  numTilesUsed:number
+) => ((numTilesUsed === 7 ? 50 : 0) + words
   .map(word => generateWordScore(placedTiles, word))
-  .reduce((acc, score) => acc + score);
+  .reduce((acc, score) => acc + score)
+);
   

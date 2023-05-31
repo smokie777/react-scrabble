@@ -5,7 +5,8 @@ export interface Log {
     word:string,
     score:number
   }[],
-  score:number
+  score:number,
+  isBingo:Boolean
 }
 
 export interface Tile {
