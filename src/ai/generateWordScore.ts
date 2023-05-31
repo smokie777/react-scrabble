@@ -1,4 +1,5 @@
 import { board } from '../game/board';
+import { generateCoordinateString } from '../game/generateCoordinateString';
 import { Tile, PlacedTiles } from '../game/types';
 
 export const generateWordScore = (placedTiles:PlacedTiles, word:Tile[]) => {
@@ -6,7 +7,7 @@ export const generateWordScore = (placedTiles:PlacedTiles, word:Tile[]) => {
   let baseWordScore = 0;
   word.forEach(letter => {
     const { x, y, points } = letter;
-    const coordinateString = `${x},${y}`;
+    const coordinateString = generateCoordinateString(x, y);
     if (placedTiles.hasOwnProperty(coordinateString)) {
       // tile score bonuses are only active for the first word that uses them.
       baseWordScore += points;

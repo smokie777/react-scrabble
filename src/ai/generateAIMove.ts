@@ -7,6 +7,7 @@ import { keyBy } from 'lodash';
 import { generateMovesScore } from './generateWordScore';
 import { generateCoordinatesForPossiblePlacements } from './generateCoordinatesForPossiblePlacements';
 import { directionMatrix } from './DirectionMatrix';
+import { generateCoordinateString } from '../game/generateCoordinateString';
 
 // limits AI processing time per turn.
 // removing this limit will allow the AI to calculate the best possible move every time,
@@ -60,7 +61,7 @@ const generateAIMoves = (
         // find the horizontal and vertical sequence containing target square.
         let counter = 1;
         while (true) {
-          const coordinateString = `${placement.x + i[0] * counter},${placement.y + i[1] * counter}`;
+          const coordinateString = generateCoordinateString(placement.x + i[0] * counter, placement.y + i[1] * counter);
           const tile:Tile|null = placedTiles[coordinateString] || newTempPlacedTiles[coordinateString] || null;
           if (tile) {
             if (i[1] === 1) { // traveling down

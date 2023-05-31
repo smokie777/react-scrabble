@@ -1,3 +1,4 @@
+import { generateCoordinateString } from '../game/generateCoordinateString';
 import { PlacedTiles, Tile } from '../game/types';
 import { directionMatrix } from './DirectionMatrix';
 
@@ -13,7 +14,7 @@ export const generateCoordinatesForPossiblePlacements = (
     // the first letter can be placed anywhere adjacent to a pre-existing placed letter.
     Object.values(placedTiles).forEach(placedTile => {
       directionMatrix.forEach(i => {
-        const coordinateString = `${placedTile.x + i[0]},${placedTile.y + i[1]}`;
+        const coordinateString = generateCoordinateString(placedTile.x + i[0], placedTile.y + i[1]);
         if (
           placedTile.x + i[0] >= 0 && placedTile.x + i[0] <= 14
           && placedTile.y + i[1] >= 0 && placedTile.y + i[1] <= 14
@@ -39,7 +40,7 @@ export const generateCoordinatesForPossiblePlacements = (
       let counter = 1;
       const startTile:Tile = Object.values(tempPlacedTiles)[0];
       while (true) {
-        const coordinateString = `${startTile.x + i[0] * counter},${startTile.y + i[1] * counter}`;
+        const coordinateString = generateCoordinateString(startTile.x + i[0] * counter, startTile.y + i[1] * counter);
         if (
           startTile.x + i[0] * counter < 0 || startTile.x + i[0] * counter > 14
           || startTile.y + i[1] * counter < 0 || startTile.y + i[1] * counter > 14

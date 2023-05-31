@@ -1,3 +1,4 @@
+import { generateCoordinateString } from './generateCoordinateString';
 import { Board, Square } from './types';
 import { range } from 'lodash';
 
@@ -8,7 +9,7 @@ const tripleLetterScoreCoordinates:string[] = ['1,5', '1,9', '5,1', '9,1', '13,5
 
 export const board:Board = range(0, 15).map(y => (
   range(0, 15).map(x => {
-    const coordinateString = `${x},${y}`;
+    const coordinateString = generateCoordinateString(x, y);
     const square:Square = {
       text: '',
       letterScoreModifier: 1,
@@ -34,7 +35,7 @@ export const board:Board = range(0, 15).map(y => (
       square.text = 'TRIPLE LETTER SCORE';
       square.letterScoreModifier = 3;
       square.color = 'dodgerblue';
-    } else if (coordinateString === '7,7') {
+    } else if (coordinateString === generateCoordinateString(7, 7)) {
       // the middle tile counts as a "double word score", according to official scrabble rules.
       square.wordScoreModifier = 2;
       square.color = 'pink';

@@ -8,7 +8,7 @@ export const LetterDistribution = ({ placedTiles }:{ placedTiles:PlacedTiles }) 
     if (placedTileCounts.hasOwnProperty(tile.letter)) {
       placedTileCounts[tile.letter]++;
     } else {
-      placedTileCounts[tile.letter] = 0;
+      placedTileCounts[tile.letter] = 1;
     }
   });
 
@@ -32,7 +32,11 @@ export const LetterDistribution = ({ placedTiles }:{ placedTiles:PlacedTiles }) 
             alignItems={offset ? 'flex-end' : 'flex-start'}
           >
             {Object.values(tileMap).slice(0 + offset, 13 + offset).map((tile, index) => (
-              <FlexContainer key={index} justifyContent='space-between' className='letter_distribution_text'>
+              <FlexContainer
+                key={index}
+                justifyContent='space-between'
+                className='letter_distribution_text'
+              >
                 <div>{tile.letter}-</div>
                 <div>{placedTileCounts[tile.letter] || 0}/{tileMap[tile.letter].count}</div>
               </FlexContainer>

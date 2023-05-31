@@ -30,6 +30,12 @@ const fetchDictionaryEntry = async(word:string) => {
   ].join('\n'));
 };
 
+const LogPlayerText = ({ turn }:{ turn:number }) => (
+  <span style={{ color: turn % 2 === 0 ? 'red' : 'seagreen' }}>
+    {turn % 2 === 0 ? 'AI' : 'Player'}
+  </span>
+);
+
 export const Logs = ({ logs }:{ logs:Log[] }) => (
   <div className='logs'>
     {logs.map((log, index) => {
@@ -38,7 +44,7 @@ export const Logs = ({ logs }:{ logs:Log[] }) => (
         logComponent = (
           <div key={index} className='log'>
             <span className='bold'>Turn {log.turn}: </span>
-            {log.turn % 2 === 0 ? 'AI' : 'Player'} played {log.words.map((i, index) => (
+            <LogPlayerText turn={log.turn} /> played {log.words.map((i, index) => (
               <span key={index}>
                 <span
                   className='dictionary_api_connected_word'
@@ -55,7 +61,7 @@ export const Logs = ({ logs }:{ logs:Log[] }) => (
       } else if (log.action === 'pass') {
         logComponent = (
           <div key={index} className='log'>
-            <span className='bold'>Turn {log.turn}:</span> {log.turn % 2 === 0 ? 'AI' : 'Player'} passed.
+            <span className='bold'>Turn {log.turn}:</span> <LogPlayerText turn={log.turn} /> passed.
           </div>
         );
       }

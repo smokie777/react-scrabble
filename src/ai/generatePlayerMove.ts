@@ -1,3 +1,4 @@
+import { generateCoordinateString } from '../game/generateCoordinateString';
 import { twl06 } from '../game/twl06';
 import { PlacedTiles, Moves, Tile } from '../game/types';
 import { directionMatrix } from './DirectionMatrix';
@@ -31,7 +32,10 @@ export const generatePlayerMove = (
       break;
     }
     for (let j = 0; j < directionMatrix.length; j++) {
-      const coordinateString = `${placements[i].x + directionMatrix[j][0]},${placements[i].y + directionMatrix[j][1]}`;
+      const coordinateString = generateCoordinateString(
+        placements[i].x + directionMatrix[j][0],
+        placements[i].y + directionMatrix[j][1]
+      );
       if (placedTiles.hasOwnProperty(coordinateString)) {
         isAtLeastOnePlacementAdjacentToPrePlacedTile = true;
         break;
@@ -66,7 +70,7 @@ export const generatePlayerMove = (
       // find the horizontal or vertical sequence containing target square.
       let counter = 1;
       while (true) {
-        const coordinateString = `${placement.x + i[0] * counter},${placement.y + i[1] * counter}`;
+        const coordinateString = generateCoordinateString(placement.x + i[0] * counter, placement.y + i[1] * counter);
         const tile:Tile|null = placedTiles[coordinateString] || tempPlacedTiles[coordinateString] || null;
         if (tile) {
           if (i[1] === 1) { // traveling down

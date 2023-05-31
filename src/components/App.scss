@@ -65,6 +65,10 @@
   margin-top: 0;
   border-radius: 10px;
   text-align: center;
+
+  &.loading {
+    background: darkgray;
+  }
 }
 
 .logs {
