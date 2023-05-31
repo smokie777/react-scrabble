@@ -1,7 +1,22 @@
+import { forEverySequencePermutation } from '../ai/forEverySequencePermutation';
+import { twl06 } from '../game/twl06';
 import { Log } from '../game/types';
 
 const fetchDictionaryEntry = async(word:string) => {
-  const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+  // if the word contains blanks, just fetch the definition for one of the possible words.
+  const wordWithBlanks = word;
+  let wordWithoutBlanks = word;
+  if (word.includes('_')) {
+    const cb = (text:string) => {
+      if (wordWithoutBlanks.includes('_') && twl06.hasOwnProperty(text)) {
+        wordWithoutBlanks = text;
+      }
+    }
+    forEverySequencePermutation(word, cb);
+  }
+
+  // fetch and alert the definition.
+  const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${wordWithoutBlanks}`);
   const data = await response.json();
   const definitions:string[] = [];
   let numShownDefinitions = 0;
@@ -22,7 +37,7 @@ const fetchDictionaryEntry = async(word:string) => {
   }
 
   alert([
-    word,
+    wordWithBlanks === wordWithoutBlanks ? word : `${wordWithoutBlanks} (${wordWithBlanks})`,
     ...definitions,
     '',
     `Showing ${numShownDefinitions}/${numTotalDefinitions} definitions.`,

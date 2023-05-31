@@ -8,6 +8,7 @@ import { generateMovesScore } from './generateWordScore';
 import { generateCoordinatesForPossiblePlacements } from './generateCoordinatesForPossiblePlacements';
 import { directionMatrix } from './DirectionMatrix';
 import { generateCoordinateString } from '../game/generateCoordinateString';
+import { forEverySequencePermutation } from './forEverySequencePermutation';
 
 // limits AI processing time per turn.
 // removing this limit will allow the AI to calculate the best possible move every time,
@@ -80,41 +81,56 @@ const generateAIMoves = (
         }
       });
 
-      // if at least one sequence is invalid, stop processing this placement.
+      // generate array of all sequences as of playing the placement.
+      // placing a letter after the first will change a sequence that was previously formed.
+      // so, depending on whether the placement was horizontal or vertical, respective previous sequences need to be overwritten.
       let newHorizontalSequences = [...horizontalSequences];
       let newVerticalSequences = [...verticalSequences];
-      if (
-        twl06InvalidSequences.hasOwnProperty(horizontalSequence.map(i => i.letter).join(''))
-        || twl06InvalidSequences.hasOwnProperty(verticalSequence.map(i => i.letter).join(''))
-      ) {
-        perfMetrics.placementsTerminatedDueToInvalidSequence++;
-        return; // proceed to next placement
-      } else {
-        // if all sequences are valid (but not necessarily actual words), record them.
-        // placing a letter after the first will change a sequence that was previously formed.
-        // so, depending on if the placement was horizontal or vertical, respective previous sequences need to be overwritten.
-        if (Object.keys(tempPlacedTiles).length > 0) {
-          if (Object.values(tempPlacedTiles)[0].x === placement.x) {
-            // placement is vertical
-            newVerticalSequences = [];
-          } else {
-            // placement is horizontal
-            newHorizontalSequences = [];
+      if (Object.keys(tempPlacedTiles).length > 0) {
+        if (Object.values(tempPlacedTiles)[0].x === placement.x) {
+          // placement is vertical
+          newVerticalSequences = [];
+        } else {
+          // placement is horizontal
+          newHorizontalSequences = [];
+        }
+      }
+      if (horizontalSequence.length > 1) {
+        newHorizontalSequences.push(horizontalSequence);
+      }
+      if (verticalSequence.length > 1) {
+        newVerticalSequences.push(verticalSequence);
+      }
+      const combinedNewSequences = [...newHorizontalSequences, ...newVerticalSequences];
+
+      // iterate through all blank-permutations of all sequences, and check sequence validity.
+      let areAllSequencesValidWords = true;
+      for (let i = 0; i < combinedNewSequences.length; i++) {
+        let isSequenceInvalid = true; // a sequence is invalid if it is not present in any twl06 word.
+        let isSequenceAValidWord = false; // a sequence is a valid word if it is in twl06.
+        const cb = (permutation:string) => {
+          // if any one permutation is a valid word, the sequence is also a valid word.
+          if (!twl06InvalidSequences.hasOwnProperty(permutation)) {
+            isSequenceInvalid = false;
           }
+          if (twl06.hasOwnProperty(permutation)) {
+            isSequenceAValidWord = true;
+          }
+        };
+        forEverySequencePermutation(combinedNewSequences[i].map(tile => tile.letter).join(''), cb);
+        if (isSequenceInvalid) {
+          // if at least one sequence is invalid, stop processing this placement.
+          return perfMetrics.placementsTerminatedDueToInvalidSequence++;
         }
-        if (horizontalSequence.length > 1) {
-          newHorizontalSequences.push(horizontalSequence);
-        }
-        if (verticalSequence.length > 1) {
-          newVerticalSequences.push(verticalSequence);
+        if (!isSequenceAValidWord) {
+          areAllSequencesValidWords = false;
         }
       }
 
       // if all sequences are valid scrabble words, record a possible "move".
       const newTiles = [...tiles];
       newTiles.splice(newTiles.indexOf(placement.letter), 1);
-      const combinedNewSequences = [...newHorizontalSequences, ...newVerticalSequences];
-      if (!combinedNewSequences.filter(sequence => !twl06.hasOwnProperty(sequence.map(i => i.letter).join(''))).length) {
+      if (combinedNewSequences.length && areAllSequencesValidWords) {
         moves.push({
           placedTiles: newTempPlacedTiles,
           words: combinedNewSequences,

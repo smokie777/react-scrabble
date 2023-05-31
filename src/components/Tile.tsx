@@ -15,7 +15,7 @@ export const Tile = ({
   isSelected?:Boolean
 }) => (
   <div className={`tile ${isSelected ? 'selected' : ''}`} onClick={() => onClick(index)}>
-    <div className='letter'>{letter}</div>
-    <div className='points'>{points}</div>
+    {letter === '_' ? null : <div className='letter'>{letter}</div>}
+    {letter === '_' ? null : <div className='points'>{points}</div>}
   </div>
 );

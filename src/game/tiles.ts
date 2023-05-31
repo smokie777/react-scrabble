@@ -31,7 +31,7 @@ export const tileMap:TileMap = {
   X: { letter: 'X', points: 8, count: 1, x: -1, y: -1 },
   Y: { letter: 'Y', points: 4, count: 2, x: -1, y: -1 },
   Z: { letter: 'Z', points: 10, count: 1, x: -1, y: -1 },
-  // BLANK: { letter: 'BLANK', points: 0, count: 2, x: -1, y: -1 }
+  _: { letter: '_', points: 0, count: 2, x: -1, y: -1 }
 };
 
 export const generateBag = () => {

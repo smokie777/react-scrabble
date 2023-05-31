@@ -14,9 +14,9 @@ import { generateCoordinateString } from '../game/generateCoordinateString';
 
 export const App = () => {
   // const [playerTiles, setPlayerTiles] = useState<TilesType>(Array(7).fill(null));
-  const [playerTiles, setPlayerTiles] = useState<TilesType>('GOGOGOO'.split(''));
+  const [playerTiles, setPlayerTiles] = useState<TilesType>('PLAYE__'.split(''));
   // const [AITiles, setAITiles] = useState<TilesType>(Array(7).fill(null));
-  const [AITiles, setAITiles] = useState<TilesType>('ROASTIN'.split(''));
+  const [AITiles, setAITiles] = useState<TilesType>('TEMPLAR'.split(''));
   const [placedTiles, setPlacedTiles] = useState<PlacedTiles>({
     // '6,7': { ...tileMap['R'], x: 6, y: 7 },
     // '7,7': { ...tileMap['I'], x: 7, y: 7 },

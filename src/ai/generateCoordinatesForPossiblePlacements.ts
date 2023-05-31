@@ -10,7 +10,10 @@ export const generateCoordinatesForPossiblePlacements = (
   const numLettersPlaced = Object.keys(tempPlacedTiles).length;
   const coordinates:{x:number,y:number}[] = [];
 
-  if (!numLettersPlaced) {
+  if (!Object.keys(placedTiles).length && !numLettersPlaced) {
+    // the first word of the game must be placed over the center square.
+    return [{ x: 7, y: 7 }];
+  } else if (!numLettersPlaced) {
     // the first letter can be placed anywhere adjacent to a pre-existing placed letter.
     Object.values(placedTiles).forEach(placedTile => {
       directionMatrix.forEach(i => {

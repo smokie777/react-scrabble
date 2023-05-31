@@ -2,6 +2,7 @@ import { generateCoordinateString } from '../game/generateCoordinateString';
 import { twl06 } from '../game/twl06';
 import { PlacedTiles, Moves, Tile } from '../game/types';
 import { directionMatrix } from './DirectionMatrix';
+import { forEverySequencePermutation } from './forEverySequencePermutation';
 import { generateMovesScore } from './generateWordScore';
 
 const areAllNumsTheSameValue = (arr:any[]) => (
@@ -93,7 +94,23 @@ export const generatePlayerMove = (
     }
   });
 
-  if (!sequences.filter(sequence => !twl06.hasOwnProperty(sequence.map(i => i.letter).join(''))).length) {
+  // iterate through all blank-permutations of all sequences, and check sequence validity.
+  let areAllSequencesValidWords = true;
+  for (let i = 0; i < sequences.length; i++) {
+    let isSequenceAValidWord = false; // a sequence is a valid word if it is in twl06.
+    const cb = (permutation:string) => {
+      if (twl06.hasOwnProperty(permutation)) {
+        isSequenceAValidWord = true;
+      }
+    };
+    forEverySequencePermutation(sequences[i].map(tile => tile.letter).join(''), cb);
+    if (!isSequenceAValidWord) {
+      areAllSequencesValidWords = false;
+    }
+  }
+
+  // if all sequences are valid scrabble words, record a "move".
+  if (areAllSequencesValidWords) {
     moves.push({
       placedTiles: tempPlacedTiles,
       words: sequences,
