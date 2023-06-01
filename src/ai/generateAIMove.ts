@@ -13,8 +13,8 @@ import { forEverySequencePermutation } from './forEverySequencePermutation';
 // limits AI processing time per turn.
 // removing this limit will allow the AI to calculate the best possible move every time,
 // but it could take upwards of 10 seconds if the board/tile states are very complex.
-// if processing time is limited, the AI will calculate the best move it could find.
-const maxAITurnTime = 1000; // ms
+// if processing time is limited, the AI will calculate the best move it could find in the given time.
+const maxAITurnTime = 2000; // ms
 
 const generatePlacementCacheId = (placements:Tile[]) => {
   const placementCacheIdArr:string[] = placements.map(i => `${i.x},${i.y},${i.letter}`);
@@ -41,45 +41,48 @@ const generateAIMoves = (
 
   // iterate through all deduped tiles, and process all possible horizontal and vertical sequence
   // created by placing that tile in a valid coordinate
-  tilesDeduped.forEach(tile => {
-    coordinates.forEach(coordinate => {
+  for (let i = 0; i < tilesDeduped.length; i++) {
+    coordinatesLoop: for (let j = 0; j < coordinates.length; j++) {
       perfMetrics.placementsTotalAttempted++;
-      const placement:Tile = { ...tileMap[tile], x: coordinate.x, y: coordinate.y };
+      const { x, y } = coordinates[j];
+      const placement:Tile = { ...tileMap[tilesDeduped[i]], x, y };
       const newTempPlacedTiles = { ...tempPlacedTiles };
-      newTempPlacedTiles[`${placement.x},${placement.y}`] = placement;
+      newTempPlacedTiles[generateCoordinateString(x, y)] = placement;
       // cache a unique id based on placement coordinates and letter to prevent duplicate iterations
       // such as iterating on 5,5 -> 5,6, and also 5,6 -> 5,5.
       const placementCacheId = generatePlacementCacheId(Object.values(newTempPlacedTiles));
       if (placementCache.hasOwnProperty(placementCacheId)) {
         perfMetrics.placementsSkippedDueToCaching++;
-        return;
+        continue; // proceed to the next coordinate for tile
       }
       placementCache[placementCacheId] = true;
 
       const horizontalSequence = [placement];
       const verticalSequence = [placement];
-      directionMatrix.forEach(i => {
+      for (let k = 0; k < directionMatrix.length; k++) {
         // find the horizontal and vertical sequence containing target square.
+        const xMod = directionMatrix[k][0];
+        const yMod = directionMatrix[k][1];
         let counter = 1;
         while (true) {
-          const coordinateString = generateCoordinateString(placement.x + i[0] * counter, placement.y + i[1] * counter);
+          const coordinateString = generateCoordinateString(x + xMod * counter, y + yMod * counter);
           const tile:Tile|null = placedTiles[coordinateString] || newTempPlacedTiles[coordinateString] || null;
           if (tile) {
-            if (i[1] === 1) { // traveling down
+            if (yMod === 1) { // traveling down
               verticalSequence.push(tile);
-            } else if (i[1] === -1) { // traveling up
+            } else if (yMod === -1) { // traveling up
               verticalSequence.unshift(tile);
-            } else if (i[0] === 1) { // traveling right
+            } else if (xMod === 1) { // traveling right
               horizontalSequence.push(tile);
-            } else if (i[0] === -1) { // traveling left
+            } else if (xMod === -1) { // traveling left
               horizontalSequence.unshift(tile);
             }
             counter++;
           } else { // if an empty tile (or edge of board) has been found, stop traveling in that direction.
-            return; // return out of forEach() and continue with the next direction.
+            break; // continue with the next direction.
           }
         }
-      });
+      }
 
       // generate array of all sequences as of playing the placement.
       // placing a letter after the first will change a sequence that was previously formed.
@@ -105,7 +108,7 @@ const generateAIMoves = (
 
       // iterate through all blank-permutations of all sequences, and check sequence validity.
       let areAllSequencesValidWords = true;
-      for (let i = 0; i < combinedNewSequences.length; i++) {
+      for (let k = 0; k < combinedNewSequences.length; k++) {
         let isSequenceInvalid = true; // a sequence is invalid if it is not present in any twl06 word.
         let isSequenceAValidWord = false; // a sequence is a valid word if it is in twl06.
         const cb = (permutation:string) => {
@@ -117,10 +120,12 @@ const generateAIMoves = (
             isSequenceAValidWord = true;
           }
         };
-        forEverySequencePermutation(combinedNewSequences[i].map(tile => tile.letter).join(''), cb);
+        forEverySequencePermutation(combinedNewSequences[k].map(tile => tile.letter).join(''), cb);
         if (isSequenceInvalid) {
           // if at least one sequence is invalid, stop processing this placement.
-          return perfMetrics.placementsTerminatedDueToInvalidSequence++;
+          // ("placement" here refers to a combo of a tile and a coordinate.)
+          perfMetrics.placementsTerminatedDueToInvalidSequence++;
+          continue coordinatesLoop;
         }
         if (!isSequenceAValidWord) {
           areAllSequencesValidWords = false;
@@ -158,8 +163,8 @@ const generateAIMoves = (
           perfMetrics
         );
       }
-    });
-  });
+    }
+  }
 };
 
 export const generateAIMove = (
