@@ -1,8 +1,6 @@
 .app {
-  background: bisque;
-  height: 100%;
-  width: 100%;
-  padding: 5px;
+  margin: 20px 20px 0 20px;
+  width: fit-content;
 
   .game {
     border: 2px solid black;
@@ -12,17 +10,17 @@
 
     .tiles {
       display: flex;
+      width: fit-content;
 
       .tile {
-        width: 40px;
-        height: 40px;
+        margin: 0 2px 2px 0;
 
         &.hidden {
           opacity: 0;
         }
 
         &.selected {
-          border: 1px solid yellow;
+          border: 3px solid yellow;
         }
       }
     }
@@ -53,18 +51,36 @@
 
 .left_section, .right_section {
   width: 300px;
-  border: 1px solid black;
+  padding: 20px;
+
+  &.left_section {
+    border-right: 2px solid black;
+  }
+
+  &.right_section {
+    border-left: 2px solid black;
+  }
+
+  .tiles {
+    transform: scale(0.75);
+  }
 }
 
 .button {
-  width: 200px;
-  height: 50px;
-  line-height: 50px;
-  background: lightgreen;
-  margin: 20px;
-  margin-top: 0;
+  width: 125px;
+  height: 35px;
+  line-height: 35px;
+  background: lightcoral;
   border-radius: 10px;
   text-align: center;
+  user-select: none;
+
+  &.play {
+    width: 260px;
+    height: 50px;
+    line-height: 50px;
+    background: lightgreen;
+  }
 
   &.loading {
     background: darkgray;
@@ -73,8 +89,7 @@
 
 .logs {
   width: 260px;
-  height: 400px;
-  margin: 20px;
+  height: 100%;
   border: 2px solid black;
   box-sizing: border-box;
   padding: 3px;

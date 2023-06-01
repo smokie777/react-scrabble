@@ -1,14 +1,17 @@
 .tile {
   background: burlywood;
   box-shadow: -2px -2px 16px black;
-  border-radius: 1px;
+  border-radius: 2px;
   display: flex;
   justify-content: center;
   align-items: center;
   box-sizing: border-box;
+  user-select: none;
+  width: 40px;
+  height: 40px;
 
   .letter {
-    font-size: 42px;
+    font-size: 38px;
   }
 
   .points {

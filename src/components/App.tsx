@@ -11,6 +11,7 @@ import { generateAIMove } from '../ai/generateAIMove';
 import { generateWordScore } from '../ai/generateWordScore';
 import { generatePlayerMove } from '../ai/generatePlayerMove';
 import { generateCoordinateString } from '../game/generateCoordinateString';
+import { Spacer } from './Spacer';
 
 export const App = () => {
   const [playerTiles, setPlayerTiles] = useState<TilesType>(Array(7).fill(null));
@@ -217,13 +218,41 @@ export const App = () => {
           justifyContent='flex-end'
           alignItems='center'
         >
+          <FlexContainer flexDirection='column' alignItems='center'>
+            <Tiles tiles={'REACT'.split('')} />
+            <Tiles tiles={'SCRABBLE'.split('')} />
+            <Spacer height={10} />
+            <div>
+              Scrabble in React, implemented by <a href='https://github.com/smkycat/react-scrabble' target='_blank' rel='noreferrer'>smkycat</a>
+            </div>
+          </FlexContainer>
+          <Spacer height={20} />
           <Logs logs={logs} />
-          <div 
-            className={`button ${turn % 2 === 0 ? 'loading' : ''}`}
-            onClick={playerPlayWord}
-          >
-            Play Word
-          </div>
+          <Spacer height={20} />
+          <FlexContainer flexDirection='column'>
+            <div 
+              className={`button play ${turn % 2 === 0 ? 'loading' : ''}`}
+              onClick={playerPlayWord}
+            >
+              Play Word
+            </div>
+            <Spacer height={10} />
+            <FlexContainer justifyContent='center'>
+              <div 
+                className={`button ${turn % 2 === 0 ? 'loading' : ''}`}
+                onClick={() => {}}
+              >
+                Re-Draw (<span className='black_unicode_rectangle'>&#9646;</span>{bagRef.current.length})
+              </div>
+              <Spacer width={10} />
+              <div 
+                className={`button ${turn % 2 === 0 ? 'loading' : ''}`}
+                onClick={() => {}}
+                >
+                Pass
+              </div>
+            </FlexContainer>
+          </FlexContainer>
         </FlexContainer>
       </div>
     </div>
