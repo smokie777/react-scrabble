@@ -1,6 +1,6 @@
+import './App.scss';
 import { useState, useRef, useEffect } from 'react';
 import { Board } from './Board';
-import './App.scss';
 import { Tiles } from './Tiles';
 import { Logs } from './Logs';
 import { LetterDistribution } from './LetterDistribution';
@@ -30,6 +30,8 @@ export const App = () => {
   const [turn, setTurn] = useState(1); // odd turns are player's turns, even turns are AI's
 
   const bagRef = useRef(generateBag());
+  const playerTotalScoreRef = useRef(0);
+  const AITotalScoreRef = useRef(0);
 
   const unplaceSelectedTiles = (coordinates:string[]) => {
     // remove player's placed tile from board and put it back into player's hand
@@ -88,6 +90,7 @@ export const App = () => {
     processedAITiles.sort((a, b) => tileMap[b].points - tileMap[a].points);
     const AIMove = generateAIMove(placedTiles, processedAITiles);
     if (AIMove) {
+      AITotalScoreRef.current += AIMove.score
       const newPlacedTiles = {
         ...placedTiles,
         ...AIMove.placedTiles
@@ -136,6 +139,7 @@ export const App = () => {
     const playerMove = generatePlayerMove(placedTiles, tempPlacedTiles)[0];
     if (playerMove) {
       // player turn - play
+      playerTotalScoreRef.current += playerMove.score;
       const newPlacedTiles = {
         ...placedTiles,
         ...playerMove.placedTiles
@@ -188,9 +192,31 @@ export const App = () => {
         <FlexContainer
           className='left_section'
           flexDirection='column'
-          justifyContent='flex-end'
-          alignItems='flex-end'
+          justifyContent='space-between'
+          alignItems='center'
         >
+          <FlexContainer className='scoreboard' justifyContent='space-around'>
+            <FlexContainer
+              className='scoreboard_half'
+              flexDirection='column'
+              alignItems='center'
+              justifyContent='center'
+            >
+              <div>Player</div>
+              <Spacer height={20} />
+              <div className='score_text'>{playerTotalScoreRef.current}</div>
+            </FlexContainer>
+            <FlexContainer
+              className='scoreboard_half'
+              flexDirection='column'
+              alignItems='center'
+              justifyContent='center'
+            >
+              <div>AI</div>
+              <Spacer height={20} />
+              <div className='score_text'>{AITotalScoreRef.current}</div>
+            </FlexContainer>
+          </FlexContainer>
           <LetterDistribution placedTiles={placedTiles} />
         </FlexContainer>
         <FlexContainer

@@ -5,9 +5,8 @@
   user-select: none;
 
   .square {
-    // width/height are 42 instead of 40, allowing the player to see the color of the square underneath a placed tile.
-    width: 42px; 
-    height: 42px;
+    width: 40px; 
+    height: 40px;
     border: 1px solid black;
     display: flex;
     justify-content: center;
@@ -22,6 +21,7 @@
       width: 100%;
       top: 2px;
       left: 2px;
+      z-index: 1;
     }    
   }  
 }

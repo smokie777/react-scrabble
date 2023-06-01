@@ -1,5 +1,5 @@
-import { board } from '../game/board';
 import './Board.scss';
+import { board } from '../game/board';
 import { tileMap } from '../game/tiles';
 import { Tile } from './Tile';
 import { PlacedTiles } from '../game/types';
@@ -45,6 +45,7 @@ export const Board = ({
               <Tile
                 letter={tempPlacedTiles[coordinateString].letter}
                 points={tileMap[tempPlacedTiles[coordinateString].letter].points}
+                isSelected={true}
               />
             ) : null}
           </div>
