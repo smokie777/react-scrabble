@@ -381,7 +381,7 @@ export const App = () => {
           justifyContent='center'
           alignItems='center'
         >
-          <Tiles tiles={AITiles} />
+          <Tiles tiles={AITiles} areTilesHidden={true} />
           <Board
             placedTiles={placedTiles}
             tempPlacedTiles={tempPlacedTiles}

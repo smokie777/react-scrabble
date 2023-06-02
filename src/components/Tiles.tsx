@@ -7,10 +7,12 @@ export const Tiles = ({
   tiles,
   tileOnClick = noop,
   selectedTileIndices = [],
+  areTilesHidden = false
 }:{
   tiles:TilesType,
   selectedTileIndices?:number[],
   tileOnClick?:Function,
+  areTilesHidden?:Boolean
 }) => (
   <div className='tiles'>
     {tiles.map((tile, index) => tile === null ? (
@@ -18,7 +20,7 @@ export const Tiles = ({
     ) : (
       <Tile
         key={index}
-        letter={tileMap[tile].letter}
+        letter={areTilesHidden ? '_' : tileMap[tile].letter}
         points={tileMap[tile].points}
         index={index}
         onClick={() => tileOnClick(index)}
