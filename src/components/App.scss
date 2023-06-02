@@ -7,13 +7,18 @@
     border-radius: 5px;
     display: flex;
     justify-content: center;
+    position: relative;
 
     .tiles {
       display: flex;
       width: fit-content;
 
       .tile {
-        margin: 0 2px 2px 0;
+        margin: 2px 2px 2px 0;
+
+        &:last-child {
+          margin-right: 0;
+        }
 
         &.hidden {
           opacity: 0;
@@ -25,62 +30,10 @@
 
 .left_section, .right_section {
   width: 300px;
-  padding: 20px;
-
-  &.left_section {
-    border-right: 2px solid black;
-  }
-
-  &.right_section {
-    border-left: 2px solid black;
-  }
+  padding: 40px 20px;
 
   .tiles {
     transform: scale(0.75);
-  }
-}
-
-.button {
-  width: 125px;
-  height: 35px;
-  line-height: 35px;
-  background: lightcoral;
-  border-radius: 10px;
-  text-align: center;
-  user-select: none;
-
-  &.play {
-    width: 260px;
-    height: 50px;
-    line-height: 50px;
-    background: lightgreen;
-  }
-
-  &.loading {
-    background: darkgray;
-  }
-}
-
-.logs {
-  width: 260px;
-  height: 100%;
-  border: 2px solid black;
-  box-sizing: border-box;
-  padding: 3px;
-  overflow-y: scroll;
-
-  .log {
-    margin-bottom: 3px;
-  }
-  
-  .dictionary_api_connected_word {
-    text-decoration: underline;
-    color: darkblue;
-    cursor: pointer;
-  }
-
-  .bingo {
-    color: palevioletred;
   }
 }
 

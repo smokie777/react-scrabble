@@ -5,27 +5,25 @@ import { noop } from 'lodash';
 
 export const Tiles = ({
   tiles,
-  setSelectedTileIndex = noop,
-  selectedTileIndex = -1,
+  tileOnClick = noop,
+  selectedTileIndices = [],
 }:{
   tiles:TilesType,
-  selectedTileIndex?:number,
-  setSelectedTileIndex?:Function,
-}) => {
-  return (
-    <div className='tiles'>
-      {tiles.map((tile, index) => tile === null ? (
-        <div key={index} className='tile hidden' />
-      ) : (
-        <Tile
-          key={index}
-          letter={tileMap[tile].letter}
-          points={tileMap[tile].points}
-          index={index}
-          onClick={setSelectedTileIndex}
-          isSelected={selectedTileIndex === index}
-        />
-      ))}
-    </div>
-  );
-};
+  selectedTileIndices?:number[],
+  tileOnClick?:Function,
+}) => (
+  <div className='tiles'>
+    {tiles.map((tile, index) => tile === null ? (
+      <div key={index} className='tile hidden' />
+    ) : (
+      <Tile
+        key={index}
+        letter={tileMap[tile].letter}
+        points={tileMap[tile].points}
+        index={index}
+        onClick={() => tileOnClick(index)}
+        isSelected={selectedTileIndices.includes(index)}
+      />
+    ))}
+  </div>
+);

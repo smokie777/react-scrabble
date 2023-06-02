@@ -1,3 +1,4 @@
+import './Logs.scss';
 import { forEverySequencePermutation } from '../ai/forEverySequencePermutation';
 import { twl06 } from '../game/twl06';
 import { Log } from '../game/types';
@@ -54,10 +55,10 @@ const LogPlayerText = ({ turn }:{ turn:number }) => (
 export const Logs = ({ logs }:{ logs:Log[] }) => (
   <div className='logs'>
     {logs.map((log, index) => {
-      let logComponent = null;
+      let logContents = null;
       if (log.action === 'move') {
-        logComponent = (
-          <div key={index} className='log'>
+        logContents = (
+          <>
             <span className='bold'>Turn {log.turn}: </span>
             <LogPlayerText turn={log.turn} /> played {log.words.map((i, index) => (
               <span key={index}>
@@ -72,16 +73,27 @@ export const Logs = ({ logs }:{ logs:Log[] }) => (
             ))}
             {log.isBingo ? <span> + <span className='bingo'>Bingo Bonus!</span> (50)</span> : null}
             &nbsp;= ({log.score} pts)
-          </div>
+          </>
         );
       } else if (log.action === 'pass') {
-        logComponent = (
-          <div key={index} className='log'>
+        logContents = (
+          <>
             <span className='bold'>Turn {log.turn}:</span> <LogPlayerText turn={log.turn} /> passed.
-          </div>
+          </>
+        );
+      } else if (log.action === 'exchange') {
+        logContents = (
+          <>
+            <span className='bold'>Turn {log.turn}:</span> <LogPlayerText turn={log.turn} /> exchanged tiles.
+          </>
         );
       }
-      return logComponent;
+
+      return (
+        <div key={index} className='log'>
+          {logContents}
+        </div>
+      );
     })}
   </div>
 );

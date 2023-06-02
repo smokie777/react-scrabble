@@ -12,6 +12,9 @@ import { generateWordScore } from '../ai/generateWordScore';
 import { generatePlayerMove } from '../ai/generatePlayerMove';
 import { generateCoordinateString } from '../game/generateCoordinateString';
 import { Spacer } from './Spacer';
+import { ExchangeTilesModal } from './ExchangeTilesModal';
+import { Button } from './Button';
+import { shuffle } from 'lodash';
 
 export const App = () => {
   const [playerTiles, setPlayerTiles] = useState<TilesType>(Array(7).fill(null));
@@ -28,6 +31,7 @@ export const App = () => {
   const [logs, setLogs] = useState<Log[]>([]);
   const [selectedTileIndex, setSelectedTileIndex] = useState(-1);
   const [turn, setTurn] = useState(1); // odd turns are player's turns, even turns are AI's
+  const [isExchangeTilesModalOpen, setIsExchangeTilesModalOpen] = useState(false);
 
   const bagRef = useRef(generateBag());
   const playerTotalScoreRef = useRef(0);
@@ -79,7 +83,42 @@ export const App = () => {
     }
   };
 
+  const exchangeTiles = (selectedIndices:number[]) => {
+    // moves player's selected tiles into bag, then redraws the same amount of tiles.
+    if (selectedIndices.length) {
+      const remainingTiles = [...playerTiles];
+      selectedIndices.forEach(index => {
+        const letter = playerTiles[index];
+        if (letter !== null) {
+          bagRef.current.push(letter);
+          remainingTiles[index] = null;
+        }
+      });
+      bagRef.current = shuffle(bagRef.current);
+      drawTiles('player', remainingTiles);
+      const log:Log = {
+        turn,
+        action: 'exchange',
+        words: [],
+        score: 0,
+        isBingo: false
+      };
+      setLogs([...logs, log]);
+      setTurn(turn + 1);
+    }
+  };
+
   const pass = () => {
+    // move all temporarily placed player's tiles back into player's hand
+    if (Object.keys(tempPlacedTiles).length) {
+      const newPlayerTiles = [...playerTiles];
+      Object.values(tempPlacedTiles).forEach(tile => {
+        newPlayerTiles[newPlayerTiles.indexOf(null)] = tile.letter;
+      });
+      setTempPlacedTiles({});
+      setPlayerTiles(newPlayerTiles);
+    }
+    // pass
     const log:Log = {
       turn,
       action: 'pass',
@@ -191,7 +230,17 @@ export const App = () => {
 
   return (
     <div className='app'>
-      <div className='game'>
+      <div className='game'>        
+        {isExchangeTilesModalOpen ? (
+          <ExchangeTilesModal
+            tiles={playerTiles}
+            onExchangeClick={(selectedIndices:number[]) => {
+              setIsExchangeTilesModalOpen(false);
+              exchangeTiles(selectedIndices);
+            }}
+            onCancelClick={() => setIsExchangeTilesModalOpen(false)}
+          />
+        ) : null}
         <FlexContainer
           className='left_section'
           flexDirection='column'
@@ -237,8 +286,8 @@ export const App = () => {
           />
           <Tiles
             tiles={playerTiles}
-            selectedTileIndex={selectedTileIndex}
-            setSelectedTileIndex={setSelectedTileIndex}
+            selectedTileIndices={[selectedTileIndex]}
+            tileOnClick={(index:number) => setSelectedTileIndex(selectedTileIndex === index ? -1 : index)}
           />
         </FlexContainer>
         <FlexContainer
@@ -259,27 +308,33 @@ export const App = () => {
           <Logs logs={logs} />
           <Spacer height={20} />
           <FlexContainer flexDirection='column'>
-            <div 
-              className={`button play ${turn % 2 === 0 ? 'loading' : ''}`}
+            <Button
+              type='green'
               onClick={playerPlayWord}
+              isDisabled={turn % 2 === 0}
             >
               Play Word
-            </div>
+            </Button>
             <Spacer height={10} />
             <FlexContainer justifyContent='center'>
-              <div 
-                className={`button ${turn % 2 === 0 ? 'loading' : ''}`}
-                onClick={() => {}}
+              <Button
+                type='red'
+                onClick={() => {
+                  unplaceSelectedTiles(Object.keys(tempPlacedTiles));
+                  setIsExchangeTilesModalOpen(true);
+                }}
+                isDisabled={turn % 2 === 0 || bagRef.current.length === 0}
               >
-                Re-Draw (<span className='black_unicode_rectangle'>&#9646;</span>{bagRef.current.length})
-              </div>
+                Exchange (<span className='black_unicode_rectangle'>&#9646;</span>{bagRef.current.length})
+              </Button>              
               <Spacer width={10} />
-              <div 
-                className={`button ${turn % 2 === 0 ? 'loading' : ''}`}
+              <Button
+                type='red'
                 onClick={pass}
-                >
+                isDisabled={turn % 2 === 0}
+              >
                 Pass
-              </div>
+              </Button>
             </FlexContainer>
           </FlexContainer>
         </FlexContainer>
