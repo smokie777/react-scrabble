@@ -79,6 +79,18 @@ export const App = () => {
     }
   };
 
+  const pass = () => {
+    const log:Log = {
+      turn,
+      action: 'pass',
+      words: [],
+      score: 0,
+      isBingo: false
+    };
+    setLogs([...logs, log]);
+    setTurn(turn + 1);
+  };
+
   const AIPlayWord = () => {
     // AI turn - play
     const processedAITiles:string[] = [];
@@ -116,19 +128,11 @@ export const App = () => {
         isBingo: Object.keys(AIMove.placedTiles).length === 7
       };
       setLogs([...logs, log]);
+      setTurn(turn + 1);
     } else {
       // AI turn - pass
-      const log:Log = {
-        turn,
-        action: 'pass',
-        words: [],
-        score: 0,
-        isBingo: false
-      };
-      setLogs([...logs, log]);
+      pass();
     }
-    
-    setTurn(turn + 1);
   };
 
   const playerPlayWord = () => {
@@ -158,12 +162,11 @@ export const App = () => {
         isBingo: Object.keys(playerMove.placedTiles).length === 7
       };
       setLogs([...logs, log]);
+      setTurn(turn + 1);
     } else {
       // player turn - play invalid word
-      return unplaceSelectedTiles(Object.keys(tempPlacedTiles));
+      unplaceSelectedTiles(Object.keys(tempPlacedTiles));
     }
-    
-    setTurn(turn + 1);
   };
 
   useEffect(() => {
@@ -273,7 +276,7 @@ export const App = () => {
               <Spacer width={10} />
               <div 
                 className={`button ${turn % 2 === 0 ? 'loading' : ''}`}
-                onClick={() => {}}
+                onClick={pass}
                 >
                 Pass
               </div>
