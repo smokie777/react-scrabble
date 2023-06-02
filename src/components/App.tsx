@@ -83,19 +83,19 @@ export const App = () => {
     }
   };
 
-  const exchangeTiles = (selectedIndices:number[]) => {
-    // moves player's selected tiles into bag, then redraws the same amount of tiles.
+  const exchangeTiles = (player:string, selectedIndices:number[]) => {
+    // moves a player's selected tiles into bag, then redraws the same amount of tiles.
     if (selectedIndices.length) {
-      const remainingTiles = [...playerTiles];
+      const remainingTiles = player === 'player' ? [...playerTiles] : [...AITiles];
       selectedIndices.forEach(index => {
-        const letter = playerTiles[index];
+        const letter = player === 'player' ? playerTiles[index] : AITiles[index];
         if (letter !== null) {
           bagRef.current.push(letter);
           remainingTiles[index] = null;
         }
       });
       bagRef.current = shuffle(bagRef.current);
-      drawTiles('player', remainingTiles);
+      drawTiles(player, remainingTiles);
       const log:Log = {
         turn,
         action: 'exchange',
@@ -169,8 +169,15 @@ export const App = () => {
       setLogs([...logs, log]);
       setTurn(turn + 1);
     } else {
-      // AI turn - pass
-      pass();
+      if (bagRef.current.length) {
+        // AI turn - exchange
+        // if exchanging tiles, the AI will simply exchange all it's tiles.
+        // implementing any other logic would be either too complex, or too subjective.
+        exchangeTiles('AI', [0, 1, 2, 3, 4, 5, 6]);
+      } else {
+        // AI turn - pass
+        pass();
+      }
     }
   };
 
@@ -236,7 +243,7 @@ export const App = () => {
             tiles={playerTiles}
             onExchangeClick={(selectedIndices:number[]) => {
               setIsExchangeTilesModalOpen(false);
-              exchangeTiles(selectedIndices);
+              exchangeTiles('player', selectedIndices);
             }}
             onCancelClick={() => setIsExchangeTilesModalOpen(false)}
           />
