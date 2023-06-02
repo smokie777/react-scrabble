@@ -18,9 +18,9 @@ import { shuffle } from 'lodash';
 
 export const App = () => {
   const [playerTiles, setPlayerTiles] = useState<TilesType>(Array(7).fill(null));
-  // const [playerTiles, setPlayerTiles] = useState<TilesType>('PLAYE__'.split(''));
+  // const [playerTiles, setPlayerTiles] = useState<TilesType>(['Q', null, null, null, null, null, null]);
   const [AITiles, setAITiles] = useState<TilesType>(Array(7).fill(null));
-  // const [AITiles, setAITiles] = useState<TilesType>('TEMPLAR'.split(''));
+  // const [AITiles, setAITiles] = useState<TilesType>(['Q', null, null, null, null, null, null]);
   const [placedTiles, setPlacedTiles] = useState<PlacedTiles>({
     // '6,7': { ...tileMap['R'], x: 6, y: 7 },
     // '7,7': { ...tileMap['I'], x: 7, y: 7 },
@@ -34,8 +34,105 @@ export const App = () => {
   const [isExchangeTilesModalOpen, setIsExchangeTilesModalOpen] = useState(false);
 
   const bagRef = useRef(generateBag());
+  // const bagRef = useRef(generateBag().map(i => 'Z'));
   const playerTotalScoreRef = useRef(0);
   const AITotalScoreRef = useRef(0);
+  const isGameOverRef = useRef(false);
+
+  const isActionDisabled = turn % 2 === 0 || isGameOverRef.current;
+
+  const checkIsGameOver = () => {
+    const playerTileCount = playerTiles.filter(i => i !== null).length
+    const AITileCount = AITiles.filter(i => i !== null).length
+    // game over ondition #1: bag is empty, and one player's hand is empty.
+    const condition1 = !bagRef.current.length && (!playerTileCount || !AITileCount);
+    // game over condition #2: 6 turns have passed without any player gaining score.
+    const condition2 = logs.slice(logs.length - 6).filter(log => !log.score).length === 6;
+    
+    if (condition1 || condition2) {
+      isGameOverRef.current = true;
+      const playerScoreBeforeDeductions = playerTotalScoreRef.current;
+      const AIScoreBeforeDeductions = AITotalScoreRef.current;
+      let playerScorePenalty = 0;
+      let AIScorePenalty = 0;
+      let winner = '';
+      playerTiles.forEach(i => {
+        if (i !== null) {
+          playerScorePenalty += tileMap[i].points;
+        }
+      });
+      AITiles.forEach(i => {
+        if (i !== null) {
+          AIScorePenalty += tileMap[i].points;
+        }
+      });
+      playerTotalScoreRef.current -= playerScorePenalty;
+      AITotalScoreRef.current -= AIScorePenalty;
+      if (condition1) {
+        if (!playerTileCount) {
+          playerTotalScoreRef.current += AIScorePenalty;
+        } else {
+          AITotalScoreRef.current += playerScorePenalty;
+        }
+      }
+      if (playerTotalScoreRef.current > AITotalScoreRef.current) {
+        winner = 'player';
+      } else if (playerTotalScoreRef.current < AITotalScoreRef.current) {
+        winner = 'AI';
+      } else if (playerScoreBeforeDeductions > AIScoreBeforeDeductions) {
+        winner = 'player';
+      } else if (playerScoreBeforeDeductions < AIScoreBeforeDeductions) {
+        winner = 'AI';
+      }
+
+      const log1:Log = {
+        turn,
+        action: `win_condition_${condition1 ? 1 : 2}`,
+        player: !playerTileCount ? 'player' : 'AI'
+      };
+      const log2:Log = {
+        turn,
+        action: 'score_penalty',
+        player: 'player',
+        score: playerScorePenalty
+      };
+      const log3:Log = {
+        turn,
+        action: 'score_penalty',
+        player: 'AI',
+        score: AIScorePenalty
+      };
+      const log4_a:Log = {
+        turn,
+        action: 'score_bonus',
+        player: 'player',
+        score: condition1 && !playerTileCount ? AIScorePenalty : 0
+      };
+      const log4_b:Log = {
+        turn,
+        action: 'score_bonus',
+        player: 'AI',
+        score: condition1 && !AITileCount ? playerScorePenalty : 0
+      };
+      const log4 = condition1 ? (
+        !playerTileCount ? log4_a : log4_b
+      ) : null;
+      const log5:Log = {
+        turn,
+        action: 'winner',
+        player: winner
+      };
+
+      const newLogs = [...logs, log1, log2, log3];
+      if (log4 !== null) {
+        newLogs.push(log4);
+      }
+      newLogs.push(log5);
+      setLogs(newLogs);
+    }
+
+    return condition1 || condition2;
+  };
 
   const unplaceSelectedTiles = (coordinates:string[]) => {
     // remove player's placed tile from board and put it back into player's hand
@@ -99,16 +196,14 @@ export const App = () => {
       const log:Log = {
         turn,
         action: 'exchange',
-        words: [],
-        score: 0,
-        isBingo: false
+        player
       };
       setLogs([...logs, log]);
       setTurn(turn + 1);
     }
   };
 
-  const pass = () => {
+  const pass = (player:string) => {
     // move all temporarily placed player's tiles back into player's hand
     if (Object.keys(tempPlacedTiles).length) {
       const newPlayerTiles = [...playerTiles];
@@ -122,9 +217,7 @@ export const App = () => {
     const log:Log = {
       turn,
       action: 'pass',
-      words: [],
-      score: 0,
-      isBingo: false
+      player
     };
     setLogs([...logs, log]);
     setTurn(turn + 1);
@@ -159,6 +252,7 @@ export const App = () => {
       const log:Log = {
         turn,
         action: 'move',
+        player: 'AI',
         words: AIMove.words.map(word => ({
           word: word.map(tile => tile.letter).join(''),
           score: generateWordScore(placedTiles, word)
@@ -176,13 +270,13 @@ export const App = () => {
         exchangeTiles('AI', [0, 1, 2, 3, 4, 5, 6]);
       } else {
         // AI turn - pass
-        pass();
+        pass('AI');
       }
     }
   };
 
   const playerPlayWord = () => {
-    if (turn % 2 === 0) {
+    if (isActionDisabled) {
       return;
     }
 
@@ -200,6 +294,7 @@ export const App = () => {
       const log:Log = {
         turn,
         action: 'move',
+        player: 'player',
         words: playerMove.words.map(word => ({
           word: word.map(tile => tile.letter).join(''),
           score: generateWordScore(placedTiles, word)
@@ -222,7 +317,9 @@ export const App = () => {
   }, []);
 
   useEffect(() => {
-    if (turn % 2 === 0) {
+    if (checkIsGameOver()) {
+      return;
+    } else if (turn % 2 === 0) {
       setTimeout(() => {
         AIPlayWord();
       }, 100);
@@ -318,7 +415,7 @@ export const App = () => {
             <Button
               type='green'
               onClick={playerPlayWord}
-              isDisabled={turn % 2 === 0}
+              isDisabled={isActionDisabled}
             >
               Play Word
             </Button>
@@ -330,15 +427,15 @@ export const App = () => {
                   unplaceSelectedTiles(Object.keys(tempPlacedTiles));
                   setIsExchangeTilesModalOpen(true);
                 }}
-                isDisabled={turn % 2 === 0 || bagRef.current.length === 0}
+                isDisabled={bagRef.current.length === 0 || isActionDisabled}
               >
                 Exchange (<span className='black_unicode_rectangle'>&#9646;</span>{bagRef.current.length})
               </Button>              
               <Spacer width={10} />
               <Button
                 type='red'
-                onClick={pass}
-                isDisabled={turn % 2 === 0}
+                onClick={() => pass('player')}
+                isDisabled={isActionDisabled}
               >
                 Pass
               </Button>

@@ -1,12 +1,13 @@
 export interface Log {
   turn:number,
   action:string,
-  words:{
+  player:string,
+  words?:{
     word:string,
     score:number
   }[],
-  score:number,
-  isBingo:Boolean
+  score?:number,
+  isBingo?:Boolean
 }
 
 export interface Tile {

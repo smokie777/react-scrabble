@@ -46,9 +46,9 @@ const fetchDictionaryEntry = async(word:string) => {
   ].join('\n'));
 };
 
-const LogPlayerText = ({ turn }:{ turn:number }) => (
-  <span style={{ color: turn % 2 === 0 ? 'red' : 'seagreen' }}>
-    {turn % 2 === 0 ? 'AI' : 'Player'}
+const LogPlayerText = ({ player }:{ player:string }) => (
+  <span style={{ color: player === 'player' ? 'seagreen' : 'red' }}>
+    {player === 'player' ? 'Player' : 'AI'}
   </span>
 );
 
@@ -60,7 +60,7 @@ export const Logs = ({ logs }:{ logs:Log[] }) => (
         logContents = (
           <>
             <span className='bold'>Turn {log.turn}: </span>
-            <LogPlayerText turn={log.turn} /> played {log.words.map((i, index) => (
+            <LogPlayerText player={log.player} /> played {(log.words || []).map((i, index) => (
               <span key={index}>
                 <span
                   className='dictionary_api_connected_word'
@@ -68,7 +68,7 @@ export const Logs = ({ logs }:{ logs:Log[] }) => (
                 >
                 {i.word}
                 </span>
-                <span> ({i.score} pts){index === log.words.length - 1 ? null : ' + '}</span>
+                <span> ({i.score} pts){index === (log.words || []).length - 1 ? null : ' + '}</span>
               </span>
             ))}
             {log.isBingo ? <span> + <span className='bingo'>Bingo Bonus!</span> (50)</span> : null}
@@ -78,14 +78,48 @@ export const Logs = ({ logs }:{ logs:Log[] }) => (
       } else if (log.action === 'pass') {
         logContents = (
           <>
-            <span className='bold'>Turn {log.turn}:</span> <LogPlayerText turn={log.turn} /> passed.
+            <span className='bold'>Turn {log.turn}: </span>
+            <LogPlayerText player={log.player} /> passed.
           </>
         );
       } else if (log.action === 'exchange') {
         logContents = (
           <>
-            <span className='bold'>Turn {log.turn}:</span> <LogPlayerText turn={log.turn} /> exchanged tiles.
+            <span className='bold'>Turn {log.turn}: </span>
+            <LogPlayerText player={log.player} /> exchanged tiles.
           </>
+        );
+      } else if (log.action === 'win_condition_1') {
+        logContents = (
+          <>
+            <span className='gameover'>Game over - the bag is empty, and <LogPlayerText player={log.player} /> has played all their tiles!</span>
+          </>
+        );
+      } else if (log.action === 'win_condition_2') {
+        logContents = (
+          <>
+            <span className='gameover'>Game over - 0 points have been scored in the last 6 turns!</span>
+          </>
+        );
+      } else if (log.action === 'score_penalty') {
+        logContents = (
+          <>
+            <LogPlayerText player={log.player} /> receives (-{log.score} pts) from remaining unplayed tiles.
+          </>
+        );
+      } else if (log.action === 'score_bonus') {
+        logContents = (
+          <>
+            <LogPlayerText player={log.player} /> receives (+{log.score} pts) from <LogPlayerText player={log.player === 'player' ? 'AI' : 'player'} />'s unplayed tiles.
+          </>
+        );
+      } else if (log.action === 'winner') {
+        logContents = log.player ? (
+          <>
+            <LogPlayerText player={log.player} /><span className='gameover'> has won!</span>
+          </>
+        ) : (
+          <span className='gameover'>It's a tie!</span>
         );
       }
 

@@ -7,7 +7,7 @@
   overflow-y: scroll;
 
   .log {
-    margin-bottom: 3px;
+    margin-bottom: 8px;
   }
   
   .dictionary_api_connected_word {
@@ -16,7 +16,7 @@
     cursor: pointer;
   }
 
-  .bingo {
+  .bingo, .gameover {
     color: palevioletred;
   }
 }
