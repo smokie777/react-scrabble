@@ -1,6 +1,6 @@
 .tile {
   background: burlywood;
-  box-shadow: -2px -2px 16px black;
+  box-shadow: -2px -2px 16px rgba(0, 0, 0, 0.7);
   border-radius: 2px;
   display: flex;
   justify-content: center;
@@ -9,6 +9,7 @@
   user-select: none;
   width: 40px;
   height: 40px;
+  cursor: pointer;
 
   .letter {
     font-size: 38px;
@@ -20,6 +21,7 @@
   }
 
   &.selected {
-    border: 2px solid yellow;
+    border: 3px solid yellow;
+    cursor: pointer !important;
   }
 }

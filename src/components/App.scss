@@ -4,7 +4,7 @@
 
   .game {
     border: 2px solid black;
-    border-radius: 5px;
+    border-radius: 25px;
     display: flex;
     justify-content: center;
     position: relative;
@@ -12,6 +12,8 @@
     .tiles {
       display: flex;
       width: fit-content;
+      gap: 0.5px;
+      margin: 3px;
 
       .tile {
         margin: 2px 2px 2px 0;
@@ -34,15 +36,21 @@
 
   .tiles {
     transform: scale(0.75);
+
+    .tile {
+      cursor: default;
+    }
   }
 }
 
 .scoreboard {
   width: 100%;
 
-  font-size: 20px;
+  .score_player_name {
+    font-size: 36px;
+  }
 
   .score_text {
-    font-size: 40px;
+    font-size: 48px;
   }
 }

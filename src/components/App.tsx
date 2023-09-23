@@ -358,7 +358,7 @@ export const App = () => {
               alignItems='center'
               justifyContent='center'
             >
-              <div>Player</div>
+              <div className='score_player_name'>Smokie</div>
               <Spacer height={20} />
               <div className='score_text'>{playerTotalScoreRef.current}</div>
             </FlexContainer>
@@ -368,7 +368,7 @@ export const App = () => {
               alignItems='center'
               justifyContent='center'
             >
-              <div>AI</div>
+              <div className='score_player_name'>LUnA</div>
               <Spacer height={20} />
               <div className='score_text'>{AITotalScoreRef.current}</div>
             </FlexContainer>
@@ -405,7 +405,7 @@ export const App = () => {
             <Tiles tiles={'SCRABBLE'.split('')} />
             <Spacer height={10} />
             <div>
-              Scrabble in React, implemented by <a href='https://github.com/smkycat/react-scrabble' target='_blank' rel='noreferrer'>smkycat</a>
+              Scrabble in React, implemented by <a href='https://github.com/smokie777/react-scrabble' target='_blank' rel='noreferrer'>smokie777</a>
             </div>
           </FlexContainer>
           <Spacer height={20} />

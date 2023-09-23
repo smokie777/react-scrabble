@@ -14,7 +14,7 @@ import { forEverySequencePermutation } from './forEverySequencePermutation';
 // removing this limit will allow the AI to calculate the best possible move every time,
 // but it could take upwards of 10 seconds if the board/tile states are very complex.
 // if processing time is limited, the AI will calculate the best move it could find in the given time.
-const maxAITurnTime = 2000; // ms
+const maxAITurnTime = 10000; // ms
 
 const generatePlacementCacheId = (placements:Tile[]) => {
   const placementCacheIdArr:string[] = placements.map(i => `${i.x},${i.y},${i.letter}`);
@@ -200,6 +200,7 @@ export const generateAIMove = (
   }
   console.log(`perfMetrics: `, perfMetrics)
   console.log(`all possible moves here:`, keyBy(fancyDisplayResult, 'stringifiedWords'));
+  console.log('-----');
 
   // return the top scoring move. this is not optimal from a competitive scrabble play point of view,
   // but adding any additional heuristics would be quite difficult and out of scope for my coding ability.

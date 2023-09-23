@@ -7,7 +7,7 @@ Hello! Welcome to React Scrabble, a personal project I'm developing. As of now, 
   - Ability to look up played words on the [Free Dictionary API](https://dictionaryapi.dev/)
   - The game uses the [TWL06 Scrabble Word List](https://www.wordgamedictionary.com/twl06/) as the "dictionary".
 
-![image](https://github.com/smkycat/react-scrabble/assets/31945139/d4acfc9b-0e93-4394-9f25-7bc37977b8bd)
+![image](https://github.com/smokie777/react-scrabble/assets/31945139/d4acfc9b-0e93-4394-9f25-7bc37977b8bd)
 
 ## AI Notes
 Developing the AI for this project was a fairly interesting and complex process.

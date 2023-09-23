@@ -15,6 +15,9 @@ body, html, #root {
 	height: 100%;
   font-family: 'Josefin Sans', sans-serif;
   background: bisque;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .bold {

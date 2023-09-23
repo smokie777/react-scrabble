@@ -2,7 +2,7 @@ import './Logs.scss';
 import { forEverySequencePermutation } from '../ai/forEverySequencePermutation';
 import { twl06 } from '../game/twl06';
 import { Log } from '../game/types';
-import { createRef, useEffect, useRef } from 'react';
+import { createRef, useEffect } from 'react';
 
 const fetchDictionaryEntry = async(word:string) => {
   // if the word contains blanks, just fetch the definition for one of the possible words.

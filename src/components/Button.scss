@@ -1,7 +1,8 @@
 .button {
-  border-radius: 10px;
+  border-radius: 25px;
   text-align: center;
   user-select: none;
+  cursor: pointer;
 
   &.green {
     width: 300px;
